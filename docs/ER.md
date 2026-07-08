@@ -4,6 +4,7 @@ erDiagram
 
     EMPLOYEE {
         bigint employee_id PK
+        varchar employee_no "UNIQUE"
         string password_hash
         string employee_name
         date birth_date
