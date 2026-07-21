@@ -1,0 +1,44 @@
+# =====================================================================
+# messages.properties
+# 人事給与管理システム 共通メッセージファイル
+# プログラム内にメッセージを直接書き込まず、本ファイルのキーを参照すること。
+# {0}, {1}... はプレースホルダ（該当データを埋め込む）。
+#
+# 【重要】このファイルは必ずUTF-8で保存すること。
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# システム共通（開始・終了・予期せぬエラー）
+# ---------------------------------------------------------------------
+system.process.start=処理を開始します。
+system.process.end=処理が終了しました。
+system.error.unexpected=予期せぬシステムエラーが発生しました。
+
+# ---------------------------------------------------------------------
+# 給与計算処理（SalaryCalculationService）
+# ---------------------------------------------------------------------
+batch.salary.start=給与計算処理を開始します。対象年月={0}年{1}月
+batch.salary.success=給与計算処理が正常終了しました。処理件数={0}、スキップ件数={1}
+batch.salary.failure=給与計算処理が異常終了しました。ステータス={0}
+batch.salary.employee.skip=給与計算をスキップしました。employeeId={0}、理由={1}
+
+error.salary.department.notfound=対象年月時点の所属部署履歴が見つかりません。employeeId={0}
+error.salary.skillgrade.notfound=職能資格マスタが見つかりません。grade={0}
+error.salary.position.notfound=役職マスタが見つかりません。positionId={0}
+error.salary.qualification.notfound=対象年月時点の資格変更履歴が見つかりません。qualificationId={0}
+
+# ---------------------------------------------------------------------
+# 勤怠管理（AttendanceService）
+# ---------------------------------------------------------------------
+warn.attendance.time.missing=出勤・退勤時刻が未入力です。employeeId={0}、workDate={1}
+warn.attendance.holidayWork.mismatch=HOLIDAY_WORKですが休日に該当しません。employeeId={0}、workDate={1}
+error.attendance.edit.deadline.exceeded=対象年月の入力期限（翌月5日）を過ぎているため、変更できません。
+
+# ---------------------------------------------------------------------
+# 退職者削除バッチ（RetireeDeleteService）
+# ---------------------------------------------------------------------
+batch.retiree.start=退職者削除バッチを開始します。cutoffDate={0}
+batch.retiree.success=退職者削除バッチが正常終了しました。削除件数={0}、スキップ件数={1}
+batch.retiree.failure=退職者削除バッチが異常終了しました。ステータス={0}
+batch.retiree.employee.deleted=社員データを削除しました。employeeId={0}、employeeNo={1}
+batch.retiree.employee.skip=削除をスキップしました。employeeId={0}、理由={1}
