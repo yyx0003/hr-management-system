@@ -58,7 +58,7 @@ public interface EmployeeRepository extends BaseMapper<Employee> {
             SELECT * FROM employee
             WHERE employee_id = #{employeeId}
             AND start_date <= #{targetMonthEnd}
-            AND (end_date IS NULL OR end_date > #{targetMonthEnd})
+            AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
             """)
     Employee findEffectiveAt(@Param("employeeId") Long employeeId,
                               @Param("targetMonthEnd") LocalDate targetMonthEnd);

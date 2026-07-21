@@ -20,7 +20,7 @@ public interface PositionRepository extends BaseMapper<Position> {
             SELECT * FROM "position"
             WHERE position_id = #{positionId}
             AND start_date <= #{targetMonthEnd}
-            AND (end_date IS NULL OR end_date > #{targetMonthEnd})
+            AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
             """)
     Position findEffectiveAt(@Param("positionId") Long positionId,
                               @Param("targetMonthEnd") LocalDate targetMonthEnd);

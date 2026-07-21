@@ -19,7 +19,7 @@ public interface QualificationRepository extends BaseMapper<Qualification> {
             SELECT * FROM qualification
             WHERE qualification_id = #{qualificationId}
             AND start_date <= #{targetMonthEnd}
-            AND (end_date IS NULL OR end_date > #{targetMonthEnd})
+            AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
             """)
     Qualification findEffectiveAt(@Param("qualificationId") Long qualificationId,
                                    @Param("targetMonthEnd") LocalDate targetMonthEnd);
