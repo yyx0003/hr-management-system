@@ -16,7 +16,7 @@ public interface SkillGradeRepository extends BaseMapper<SkillGrade> {
             SELECT * FROM skill_grade
             WHERE skill_grade = #{skillGrade}
             AND start_date <= #{targetMonthEnd}
-            AND (end_date IS NULL OR end_date > #{targetMonthEnd})
+            AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
             """)
     SkillGrade findEffectiveAt(@Param("skillGrade") Integer skillGrade,
                                 @Param("targetMonthEnd") LocalDate targetMonthEnd);
