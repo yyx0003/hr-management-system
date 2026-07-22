@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Mapper
 public interface DepartmentRepository extends BaseMapper<Department> {
@@ -20,4 +21,10 @@ public interface DepartmentRepository extends BaseMapper<Department> {
             """)
     Department findEffectiveAt(@Param("departmentId") Long departmentId,
                                 @Param("targetMonthEnd") LocalDate targetMonthEnd);
+    
+    @Select("""
+            SELECT * FROM department        
+            ORDER BY department_id, start_date
+        """)
+    List<Department> findAllDepartments();
 }
