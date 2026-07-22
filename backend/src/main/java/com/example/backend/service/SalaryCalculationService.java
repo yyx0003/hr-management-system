@@ -74,7 +74,7 @@ public class SalaryCalculationService {
         return new SalaryCalculationResult(processedCount, skipped.size(), skipped);
     }
 
-    /** 対象社員1名分の給与計算を行う（1社員1トランザクション）。 */
+    /** 対象社員1名分の給与計算を行う。 */
     @Transactional
     public void calculateOne(Long employeeId, YearMonth targetYearMonth) {
         LocalDate targetMonthStart = targetYearMonth.atDay(1);
