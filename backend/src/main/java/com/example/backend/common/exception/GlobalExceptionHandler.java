@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.backend.common.ErrorResponse;
 import com.example.backend.common.MessageService;
@@ -21,10 +22,32 @@ public class GlobalExceptionHandler {
             BusinessException exception) {
 
         ErrorResponse response =
-                new ErrorResponse(false, exception.getMessage());
+                new ErrorResponse(
+                        false,
+                        exception.getMessage());
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(exception.getStatus())
+                .body(response);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(
+            ResponseStatusException exception) {
+
+        String message = exception.getReason();
+
+        if (message == null || message.isBlank()) {
+            message = exception.getMessage();
+        }
+
+        ErrorResponse response =
+                new ErrorResponse(
+                        false,
+                        message);
+
+        return ResponseEntity
+                .status(exception.getStatusCode())
                 .body(response);
     }
 
