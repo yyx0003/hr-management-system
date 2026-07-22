@@ -27,5 +27,5 @@ public interface DepartmentRepository extends BaseMapper<Department> {
             WHERE start_date <= #{targetMonthEnd}
             AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
         """)
-    List<Department> findAllEffectiveDepartments(@Param("targetMonthEnd") LocalDate targetMonthEnd);
+    List<Department> findAllEffectiveAt(@Param("targetMonthEnd") LocalDate targetMonthEnd);
 }

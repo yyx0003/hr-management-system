@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * 【注意】テーブル名は"position"（ダブルクォート付き）で作成されているため、
@@ -31,5 +32,5 @@ public interface PositionRepository extends BaseMapper<Position> {
             WHERE start_date <= #{targetMonthEnd}
             AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
             """)
-    Position findAllEffectivePositions(@Param("targetMonthEnd") LocalDate targetMonthEnd);
+    List<Position> findAllEffectiveAt(@Param("targetMonthEnd") LocalDate targetMonthEnd);
 }

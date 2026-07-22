@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Mapper
 public interface QualificationRepository extends BaseMapper<Qualification> {
@@ -30,5 +31,5 @@ public interface QualificationRepository extends BaseMapper<Qualification> {
             WHERE start_date <= #{targetMonthEnd}
             AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
             """)
-    Qualification findAllEffectiveQualification(@Param("targetMonthEnd") LocalDate targetMonthEnd);
+    List<Qualification> findAllEffectiveAt(@Param("targetMonthEnd") LocalDate targetMonthEnd);
 }
