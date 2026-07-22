@@ -42,7 +42,7 @@ class SecurityConfigTest {
 
     @Test
     void apiEndpointRequiresJwt() throws Exception {
-        mockMvc.perform(get("/api/employees"))
+        mockMvc.perform(get("/api/employees/12345"))
                 .andExpect(status().isUnauthorized());
     }
 
