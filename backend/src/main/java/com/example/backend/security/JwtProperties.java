@@ -1,0 +1,14 @@
+package com.example.backend.security;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
+
+@ConfigurationProperties(prefix = "jwt")
+@Validated
+public record JwtProperties(
+        @NotBlank String secret,
+        @Min(1) long expirationMinutes
+) {
+}
