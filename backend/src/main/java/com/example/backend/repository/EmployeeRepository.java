@@ -63,6 +63,20 @@ public interface EmployeeRepository extends BaseMapper<Employee> {
     Employee findEffectiveAt(@Param("employeeId") Long employeeId,
                               @Param("targetMonthEnd") LocalDate targetMonthEnd);
 
+    /**
+     * 基準日時点で有効かつ在職中の社員履歴を社員番号で取得する。
+     * 退職日当日は在職中として扱う。
+     */
+    @Select("""
+            SELECT * FROM employee
+            WHERE employee_no = #{employeeNo}
+            AND start_date <= #{referenceDate}
+            AND (end_date IS NULL OR end_date >= #{referenceDate})
+            AND (retire_date IS NULL OR retire_date >= #{referenceDate})
+            """)
+    Employee findEffectiveAndEmployedByEmployeeNoAt(@Param("employeeNo") String employeeNo,
+                                                     @Param("referenceDate") LocalDate referenceDate);
+
     /** 対象employee_idの全履歴行を取得する。 */
     @Select("SELECT * FROM employee WHERE employee_id = #{employeeId}")
     List<Employee> findByEmployeeId(@Param("employeeId") Long employeeId);
