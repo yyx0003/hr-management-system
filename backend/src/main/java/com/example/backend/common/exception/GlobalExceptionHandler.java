@@ -6,9 +6,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.example.backend.common.ErrorResponse;
+import com.example.backend.common.MessageService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MessageService messageService;
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(
@@ -29,7 +35,8 @@ public class GlobalExceptionHandler {
         ErrorResponse response =
                 new ErrorResponse(
                         false,
-                        "予期せぬシステムエラーが発生しました。");
+                        messageService.getMessage(
+                                "system.error.unexpected"));
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
