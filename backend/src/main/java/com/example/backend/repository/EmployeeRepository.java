@@ -1,6 +1,7 @@
 package com.example.backend.repository;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.backend.dto.employee.EmployeeListDTO;
 import com.example.backend.entity.Employee;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
@@ -76,6 +77,46 @@ public interface EmployeeRepository extends BaseMapper<Employee> {
             """)
     Employee findEffectiveAndEmployedByEmployeeNoAt(@Param("employeeNo") String employeeNo,
                                                      @Param("referenceDate") LocalDate referenceDate);
+
+    @Select("""
+            <script>
+            SELECT
+                e.employee_id,
+                e.employee_no,
+                e.employee_name,
+                d.department_name,
+                p.position_name,
+                e.skill_grade,
+                e.hire_date
+            FROM employee e
+            INNER JOIN department d
+                ON d.department_id = e.department_id
+                AND d.start_date &lt;= #{referenceDate}
+                AND (d.end_date IS NULL OR d.end_date &gt;= #{referenceDate})
+            LEFT JOIN "position" p
+                ON p.position_id = e.position_id
+                AND p.start_date &lt;= #{referenceDate}
+                AND (p.end_date IS NULL OR p.end_date &gt;= #{referenceDate})
+            WHERE e.start_date &lt;= #{referenceDate}
+                AND (e.end_date IS NULL OR e.end_date &gt;= #{referenceDate})
+                AND (e.retire_date IS NULL OR e.retire_date &gt;= #{referenceDate})
+            <if test="employeeNo != null">
+                AND e.employee_no LIKE CONCAT('%', #{employeeNo}, '%') ESCAPE '!'
+            </if>
+            <if test="employeeName != null">
+                AND e.employee_name LIKE CONCAT('%', #{employeeName}, '%') ESCAPE '!'
+            </if>
+            <if test="departmentId != null">
+                AND e.department_id = #{departmentId}
+            </if>
+            ORDER BY e.employee_no ASC
+            </script>
+            """)
+    List<EmployeeListDTO> searchEffectiveAndEmployed(
+            @Param("employeeNo") String employeeNo,
+            @Param("employeeName") String employeeName,
+            @Param("departmentId") Long departmentId,
+            @Param("referenceDate") LocalDate referenceDate);
 
     /** 対象employee_idの全履歴行を取得する。 */
     @Select("SELECT * FROM employee WHERE employee_id = #{employeeId}")

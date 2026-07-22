@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.example.backend.common.MessageService;
 import com.example.backend.common.exception.BusinessException;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
+import com.example.backend.dto.employee.EmployeeListDTO;
 import com.example.backend.dto.employee.QualificationDetailDTO;
 import com.example.backend.entity.Employee;
 import com.example.backend.repository.EmployeeQualificationRepository;
@@ -22,6 +23,15 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final EmployeeQualificationRepository employeeQualificationRepository;
     private final MessageService messageService;
+
+    public java.util.List<EmployeeListDTO> searchEmployees(
+            String employeeNo, String employeeName, Long departmentId) {
+        return employeeRepository.searchEffectiveAndEmployed(
+                escapeLike(employeeNo),
+                escapeLike(employeeName),
+                departmentId,
+                LocalDate.now());
+    }
 
     public EmployeeDetailDTO getEmployeeDetail(String employeeNo) {
         Employee employee = getEffectiveEmployee(employeeNo, LocalDate.now());
@@ -62,5 +72,14 @@ public class EmployeeService {
         }
 
         return employee;
+    }
+
+    private String escapeLike(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_");
     }
 }

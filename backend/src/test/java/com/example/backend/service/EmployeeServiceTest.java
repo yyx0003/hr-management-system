@@ -21,6 +21,7 @@ import com.example.backend.common.exception.BusinessException;
 import com.example.backend.entity.Employee;
 import com.example.backend.entity.EmployeeQualification;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
+import com.example.backend.dto.employee.EmployeeListDTO;
 import com.example.backend.repository.EmployeeQualificationRepository;
 import com.example.backend.repository.EmployeeRepository;
 
@@ -142,6 +143,23 @@ class EmployeeServiceTest {
         EmployeeDetailDTO result = service.getEmployeeDetail(EMPLOYEE_NO);
 
         assertThat(result.qualifications()).isEmpty();
+    }
+
+    @Test
+    void searchEmployeesUsesCurrentDateAndEscapesLikeWildcards() {
+        EmployeeListDTO employee = new EmployeeListDTO();
+        employee.setEmployeeNo("0012");
+        when(employeeRepository.searchEffectiveAndEmployed(
+                eq("12!%!_\\"), eq("A!_B"), eq(2L), any(LocalDate.class)))
+                .thenReturn(List.of(employee));
+        EmployeeService service = new EmployeeService(
+                employeeRepository, employeeQualificationRepository, messageService);
+
+        List<EmployeeListDTO> result = service.searchEmployees("12%_\\", "A_B", 2L);
+
+        assertThat(result).containsExactly(employee);
+        verify(employeeRepository).searchEffectiveAndEmployed(
+                eq("12!%!_\\"), eq("A!_B"), eq(2L), any(LocalDate.class));
     }
 
     private EmployeeQualification qualification(Long qualificationId, LocalDate acquisitionDate) {
