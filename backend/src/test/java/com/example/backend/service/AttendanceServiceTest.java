@@ -40,15 +40,8 @@ class AttendanceServiceTest {
                         LocalTime.of(17, 0),
                         Attendance.WorkType.NORMAL);
 
-        assertEquals(
-                0,
-                new BigDecimal("8.00")
-                        .compareTo(result.getWorkHours()));
-
-        assertEquals(
-                0,
-                BigDecimal.ZERO
-                        .compareTo(result.getOvertimeHours()));
+        assertHours("8.00", result.getWorkHours());
+        assertHours("0.00", result.getOvertimeHours());
     }
 
     @Test
@@ -60,15 +53,8 @@ class AttendanceServiceTest {
                         LocalTime.of(18, 0),
                         Attendance.WorkType.NORMAL);
 
-        assertEquals(
-                0,
-                new BigDecimal("9.00")
-                        .compareTo(result.getWorkHours()));
-
-        assertEquals(
-                0,
-                new BigDecimal("1.00")
-                        .compareTo(result.getOvertimeHours()));
+        assertHours("8.00", result.getWorkHours());
+        assertHours("1.00", result.getOvertimeHours());
     }
 
     @Test
@@ -80,19 +66,12 @@ class AttendanceServiceTest {
                         LocalTime.of(18, 0),
                         Attendance.WorkType.NORMAL);
 
-        assertEquals(
-                0,
-                new BigDecimal("8.50")
-                        .compareTo(result.getWorkHours()));
-
-        assertEquals(
-                0,
-                new BigDecimal("0.50")
-                        .compareTo(result.getOvertimeHours()));
+        assertHours("8.00", result.getWorkHours());
+        assertHours("0.50", result.getOvertimeHours());
     }
 
     @Test
-    void paidLeaveReturnsZero() {
+    void paidLeaveReturnsEightHours() {
 
         WorkHoursResult result =
                 attendanceService.calculateWorkHours(
@@ -100,15 +79,8 @@ class AttendanceServiceTest {
                         null,
                         Attendance.WorkType.PAID_LEAVE);
 
-        assertEquals(
-                0,
-                BigDecimal.ZERO
-                        .compareTo(result.getWorkHours()));
-
-        assertEquals(
-                0,
-                BigDecimal.ZERO
-                        .compareTo(result.getOvertimeHours()));
+        assertHours("8.00", result.getWorkHours());
+        assertHours("0.00", result.getOvertimeHours());
     }
 
     @Test
@@ -120,15 +92,8 @@ class AttendanceServiceTest {
                         null,
                         Attendance.WorkType.ABSENCE);
 
-        assertEquals(
-                0,
-                BigDecimal.ZERO
-                        .compareTo(result.getWorkHours()));
-
-        assertEquals(
-                0,
-                BigDecimal.ZERO
-                        .compareTo(result.getOvertimeHours()));
+        assertHours("0.00", result.getWorkHours());
+        assertHours("0.00", result.getOvertimeHours());
     }
 
     @Test
@@ -140,15 +105,8 @@ class AttendanceServiceTest {
                         LocalTime.of(19, 0),
                         Attendance.WorkType.HOLIDAY_WORK);
 
-        assertEquals(
-                0,
-                new BigDecimal("9.00")
-                        .compareTo(result.getWorkHours()));
-
-        assertEquals(
-                0,
-                new BigDecimal("1.00")
-                        .compareTo(result.getOvertimeHours()));
+        assertHours("0.00", result.getWorkHours());
+        assertHours("9.00", result.getOvertimeHours());
     }
 
     @Test
@@ -254,5 +212,14 @@ class AttendanceServiceTest {
         assertEquals(
                 "勤務区分が正しくありません。",
                 exception.getMessage());
+    }
+
+    private void assertHours(
+            String expected,
+            BigDecimal actual) {
+
+        assertEquals(
+                0,
+                new BigDecimal(expected).compareTo(actual));
     }
 }
