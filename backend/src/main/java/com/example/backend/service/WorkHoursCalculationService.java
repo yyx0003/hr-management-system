@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.example.backend.constant.SalaryConstants;
+import com.example.backend.controller.SalaryConstants;
 import com.example.backend.dto.attendance.WorkHoursResult;
 import com.example.backend.entity.Attendance;
 import com.example.backend.entity.Attendance.WorkType;
@@ -24,13 +24,6 @@ import lombok.extern.slf4j.Slf4j;
  
 /**
 * 勤怠実績から稼働時間・残業時間を算出する共通ロジック。
-*
-* 【設計上の注意】本クラスはAttendanceRepository／HolidayRepositoryにのみ依存し、
-* AttendanceServiceやSalaryCalculationServiceには一切依存しない。
-* 勤怠管理（登録・更新・CSV取込後の再計算）と給与計算の両方から呼び出される想定のため、
-* どちらか一方に依存させると循環依存（AttendanceService⇔SalaryCalculationService）が
-* 発生し、Spring起動時にエラーとなる。そのため本クラスを独立させ、両者はこのクラスのみに
-* 依存する形にしている。
 *
 * 稼働時間・残業時間はBigDecimal（スケール2、四捨五入）で計算する。
 * 出勤時刻が何時であっても補正は行わない（早出分もそのまま実働時間に含める）。

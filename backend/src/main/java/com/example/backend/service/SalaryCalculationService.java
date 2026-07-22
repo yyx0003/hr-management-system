@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.common.MessageService;
-import com.example.backend.constant.SalaryConstants;
+import com.example.backend.controller.SalaryConstants;
 import com.example.backend.dto.SalaryCalculationResult;
 import com.example.backend.dto.SalaryCalculationResult.SkippedEmployee;
 import com.example.backend.dto.attendance.WorkHoursResult;
