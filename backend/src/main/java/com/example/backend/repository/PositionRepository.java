@@ -24,4 +24,12 @@ public interface PositionRepository extends BaseMapper<Position> {
             """)
     Position findEffectiveAt(@Param("positionId") Long positionId,
                               @Param("targetMonthEnd") LocalDate targetMonthEnd);
+
+    /** 対象年月時点で有効な役職リストを取得する。 */
+    @Select("""
+            SELECT * FROM "position"
+            WHERE start_date <= #{targetMonthEnd}
+            AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
+            """)
+    Position findAllEffectivePositions(@Param("targetMonthEnd") LocalDate targetMonthEnd);
 }

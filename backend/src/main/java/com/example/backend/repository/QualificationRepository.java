@@ -18,9 +18,17 @@ public interface QualificationRepository extends BaseMapper<Qualification> {
     @Select("""
             SELECT * FROM qualification
             WHERE qualification_id = #{qualificationId}
-            AND start_date <= #{targetMonthEnd}
+            WHERE start_date <= #{targetMonthEnd}
             AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
             """)
     Qualification findEffectiveAt(@Param("qualificationId") Long qualificationId,
                                    @Param("targetMonthEnd") LocalDate targetMonthEnd);
+
+     /** 対象年月末日時点で有効な資格リストを取得する。*/
+    @Select("""
+            SELECT * FROM qualification
+            WHERE start_date <= #{targetMonthEnd}
+            AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
+            """)
+    Qualification findAllEffectiveQualification(@Param("targetMonthEnd") LocalDate targetMonthEnd);
 }
