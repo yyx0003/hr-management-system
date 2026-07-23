@@ -38,7 +38,7 @@ public class DepartmentService {
         List<Department> departments = departmentRepository.findAllEffectiveAt(targetDate);
         if (departments.isEmpty()) {
             throw new BusinessException(
-                    messageSource.getMessage("master.findEffectiveAt.notfound", null, Locale.getDefault()));
+                    messageSource.getMessage("master.find.notfound", null, Locale.getDefault()));
         } else {
             return departments;
         }

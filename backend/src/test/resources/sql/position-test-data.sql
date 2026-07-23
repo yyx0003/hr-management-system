@@ -10,8 +10,8 @@ SET client_encoding = 'UTF8';
 -- =====================================================================
 
 BEGIN;
-DELETE FROM position;
-INSERT INTO position (
+DELETE FROM "position";
+INSERT INTO "position" (
     position_id,
     start_date,
     position_name,
