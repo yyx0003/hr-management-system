@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SpringBootTest(properties = {
                 "jwt.secret=QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0MTIzNDU2Nzg5MDEyMzQ=",
@@ -49,7 +50,7 @@ class DepartmentRepositoryTest {
         }
 
         @Test
-        @DisplayName("対象日時点で有効な部署が存在しない場合はnull")
+        @DisplayName("開始日の前日は取得できない")
         void findEffectiveAtTest3() {
 
                 LocalDate targetDate = LocalDate.of(2026, 3, 31);
@@ -60,7 +61,7 @@ class DepartmentRepositoryTest {
         }
 
         @Test
-        @DisplayName("部署情報が2つ存在する場合に、対象日時点での部署を取得できる（過去データ）")
+        @DisplayName("履歴切替日の前日は切替前の情報を取得する")
         void findEffectiveAtTest4() {
 
                 LocalDate targetDate = LocalDate.of(2026, 6, 30);
@@ -73,10 +74,10 @@ class DepartmentRepositoryTest {
         }
 
         @Test
-        @DisplayName("部署情報が2つ存在する場合に、対象日時点での部署を取得できる（最新データ）")
+        @DisplayName("履歴切替日の当日は切替後の情報を取得する")
         void findEffectiveAtTest5() {
 
-                LocalDate targetDate = LocalDate.of(2026, 8, 31);
+                LocalDate targetDate = LocalDate.of(2026, 7, 1);
 
                 Department result = departmentRepository.findEffectiveAt(5L, targetDate);
 
@@ -99,18 +100,39 @@ class DepartmentRepositoryTest {
         }
 
         @Test
-        @DisplayName("対象年月末日時点で有効な部署のリストを取得できる")
+        @DisplayName("存在しない部署IDが指定された場合はnullを返す")
+        void findEffectiveAtTest7() {
+
+                LocalDate targetDate = LocalDate.of(2026, 6, 30);
+
+                Department result = departmentRepository.findEffectiveAt(10L, targetDate);
+
+                assertThat(result).isNull();
+        }
+
+        @Test
+        @DisplayName("履歴が切り替わる前日は、切り替わる前のリストを取得できる")
         void findAllEffectiveAtTest1() {
 
-                LocalDate targetDate = LocalDate.of(2026, 4, 30);
+                LocalDate targetDate = LocalDate.of(2026, 6, 30);
                 List<Department> departments = departmentRepository.findAllEffectiveAt(targetDate);
                 assertThat(departments).isNotNull();
                 assertThat(departments)
-                        .extracting(Department::getDepartmentName)
-                        .containsExactlyInAnyOrder(
-                                "経営", "営業", "人事", "開発1室", "開発3室"
-                        );
+                                .extracting(Department::getDepartmentName)
+                                .containsExactlyInAnyOrder(
+                                                "経営", "営業", "人事", "開発1室", "開発2室", "A社開発室");
         }
-        
-        
+
+        @Test
+        @DisplayName("履歴が切り替わる当日は、切り替わる後のリストを取得できる")
+        void findAllEffectiveAtTest2() {
+
+                LocalDate targetDate = LocalDate.of(2026, 7, 1);
+                List<Department> departments = departmentRepository.findAllEffectiveAt(targetDate);
+                assertThat(departments).isNotNull();
+                assertThat(departments)
+                                .extracting(Department::getDepartmentName)
+                                .containsExactlyInAnyOrder(
+                                                "経営", "営業", "人事", "開発1室", "保守・運用室", "B社開発室");
+        }
 }

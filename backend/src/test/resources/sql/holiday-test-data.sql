@@ -1,0 +1,40 @@
+SET client_encoding = 'UTF8';
+
+BEGIN;
+
+DELETE FROM holiday;
+
+INSERT INTO holiday (
+    holiday_date,
+    holiday_type,
+    holiday_name
+) VALUES
+    (DATE '2026-01-01', 'HOLIDAY', '元日'),
+    (DATE '2026-01-12', 'HOLIDAY', '成人の日'),
+    (DATE '2026-02-11', 'HOLIDAY', '建国記念の日'),
+    (DATE '2026-02-23', 'HOLIDAY', '天皇誕生日'),
+    (DATE '2026-03-20', 'HOLIDAY', '春分の日'),
+    (DATE '2026-04-29', 'HOLIDAY', '昭和の日'),
+    (DATE '2026-05-03', 'HOLIDAY', '憲法記念日'),
+    (DATE '2026-05-04', 'HOLIDAY', 'みどりの日'),
+    (DATE '2026-05-05', 'HOLIDAY', 'こどもの日'),
+    (DATE '2026-05-06', 'HOLIDAY', '振替休日'),
+    (DATE '2026-07-20', 'HOLIDAY', '海の日'),
+    (DATE '2026-08-11', 'HOLIDAY', '山の日'),
+    (DATE '2026-09-21', 'HOLIDAY', '敬老の日'),
+    (DATE '2026-09-22', 'HOLIDAY', '国民の休日'),
+    (DATE '2026-09-23', 'HOLIDAY', '秋分の日'),
+    (DATE '2026-10-12', 'HOLIDAY', 'スポーツの日'),
+    (DATE '2026-11-03', 'HOLIDAY', '文化の日'),
+    (DATE '2026-11-23', 'HOLIDAY', '勤労感謝の日'),
+
+    -- 夏季休暇（仮設定）
+    (DATE '2026-08-13', 'SUMMER', '夏季休暇'),
+    (DATE '2026-08-14', 'SUMMER', '夏季休暇'),
+
+    -- 冬期休暇（仮設定）
+    (DATE '2026-12-29', 'WINTER', '冬期休暇'),
+    (DATE '2026-12-30', 'WINTER', '冬期休暇'),
+    (DATE '2026-12-31', 'WINTER', '冬期休暇');
+
+COMMIT;

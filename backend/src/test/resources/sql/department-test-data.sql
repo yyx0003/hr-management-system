@@ -3,7 +3,7 @@ SET client_encoding = 'UTF8';
 -- =====================================================================
 -- テスト用マスタデータ
 -- 対象テーブル:
---   department / position / skill_grade / qualification
+--   department
 --
 -- 前提:
 --   schema.sqlを先に実行すること。
