@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -8,9 +9,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -21,7 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,7 +41,9 @@ import com.example.backend.dto.attendance.AttendanceListItem;
 import com.example.backend.dto.attendance.AttendanceListResponse;
 import com.example.backend.dto.attendance.AttendanceUpdateRequest;
 import com.example.backend.dto.attendance.CsvImportError;
+import com.example.backend.dto.csv.CsvFileData;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
+import com.example.backend.service.AttendanceCsvExportService;
 import com.example.backend.service.AttendanceCsvImportService;
 import com.example.backend.service.AttendanceRegistrationService;
 import com.example.backend.service.AttendanceUpdateService;
@@ -65,6 +73,9 @@ class AttendanceControllerTest {
     private AttendanceCsvImportService attendanceCsvImportService;
 
     @Mock
+    private AttendanceCsvExportService attendanceCsvExportService;
+
+    @Mock
     private EmployeeService employeeService;
 
     @Mock
@@ -85,12 +96,13 @@ class AttendanceControllerTest {
 
         AttendanceController controller =
                 new AttendanceController(
-                        monthlyAttendanceListService,
-                        attendanceRegistrationService,
-                        attendanceUpdateService,
-                        attendanceCsvImportService,
-                        employeeService,
-                        messageService);
+                monthlyAttendanceListService,
+                attendanceRegistrationService,
+                attendanceUpdateService,
+                attendanceCsvImportService,
+                attendanceCsvExportService,
+                employeeService,
+                messageService);
 
         mockMvc =
                 MockMvcBuilders
@@ -100,7 +112,8 @@ class AttendanceControllerTest {
                                         messageService))
                         .setMessageConverters(
                                 new MappingJackson2HttpMessageConverter(
-                                        objectMapper))
+                                        objectMapper),
+                                new ByteArrayHttpMessageConverter())
                         .build();
     }
 
@@ -623,6 +636,159 @@ class AttendanceControllerTest {
                 never())
                 .importCsv(
                         any(),
+                        any(),
+                        any(),
+                        any());
+    }
+    /**
+     * 勤怠CSVがダウンロードできること。
+     */
+    @Test
+    void exportAttendanceCsvReturnsCsvFile()
+            throws Exception {
+
+        when(principal.getName())
+                .thenReturn("1924");
+
+        when(employeeService.getEmployeeDetail("1924"))
+                .thenReturn(createEmployeeDetail());
+
+        String csvContent =
+                "\uFEFF"
+                        + "employeeNo,workDate,"
+                        + "attendanceTime,leavingTime,workType"
+                        + System.lineSeparator()
+                        + "1924,2026-07-01,"
+                        + "09:00,18:00,NORMAL"
+                        + System.lineSeparator();
+
+        CsvFileData csvFile =
+                new CsvFileData(
+                        "勤怠_1924_2026-07.csv",
+                        csvContent.getBytes(
+                                StandardCharsets.UTF_8));
+
+        when(attendanceCsvExportService.exportCsv(
+                any(),
+                any(),
+                any()))
+                .thenReturn(csvFile);
+
+        mockMvc.perform(
+                        get("/api/attendances/csv-export")
+                                .param(
+                                        "targetMonth",
+                                        "2026-07")
+                                .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(
+                        header()
+                                .string(
+                                        HttpHeaders.CONTENT_DISPOSITION,
+                                        containsString("attachment")))
+                .andExpect(
+                        header()
+                                .string(
+                                        HttpHeaders.CONTENT_DISPOSITION,
+                                        containsString("filename")))
+                .andExpect(
+                        content()
+                                .contentTypeCompatibleWith(
+                                        "text/csv"))
+                .andExpect(
+                        content()
+                                .bytes(
+                                        csvContent.getBytes(
+                                                StandardCharsets.UTF_8)));
+
+        verify(employeeService)
+                .getEmployeeDetail("1924");
+
+        verify(attendanceCsvExportService)
+                .exportCsv(
+                        1L,
+                        "1924",
+                        YearMonth.of(2026, 7));
+    }
+
+    /**
+     * CSV出力対象年月が未指定の場合、
+     * 400エラーになること。
+     */
+    @Test
+    void exportAttendanceCsvWithoutTargetMonthReturnsBadRequest()
+            throws Exception {
+
+        when(principal.getName())
+                .thenReturn("1924");
+
+        when(employeeService.getEmployeeDetail("1924"))
+                .thenReturn(createEmployeeDetail());
+
+        when(messageService.getMessage(
+                "scr070.export.targetMonth.required"))
+                .thenReturn(
+                        "対象年月を選択してください。");
+
+        mockMvc.perform(
+                        get("/api/attendances/csv-export")
+                                .principal(principal))
+                .andExpect(status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.success")
+                                .value(false))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "対象年月を選択してください。"));
+
+        verify(
+                attendanceCsvExportService,
+                never())
+                .exportCsv(
+                        any(),
+                        any(),
+                        any());
+    }
+
+    /**
+     * CSV出力対象年月の形式が不正な場合、
+     * 400エラーになること。
+     */
+    @Test
+    void exportAttendanceCsvWithInvalidTargetMonthReturnsBadRequest()
+            throws Exception {
+
+        when(principal.getName())
+                .thenReturn("1924");
+
+        when(employeeService.getEmployeeDetail("1924"))
+                .thenReturn(createEmployeeDetail());
+
+        when(messageService.getMessage(
+                "error.attendance.targetMonth.invalid"))
+                .thenReturn(
+                        "対象年月の形式が正しくありません（yyyy-MM）。");
+
+        mockMvc.perform(
+                        get("/api/attendances/csv-export")
+                                .param(
+                                        "targetMonth",
+                                        "2026/07")
+                                .principal(principal))
+                .andExpect(status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.success")
+                                .value(false))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "対象年月の形式が正しくありません（yyyy-MM）。"));
+
+        verify(
+                attendanceCsvExportService,
+                never())
+                .exportCsv(
                         any(),
                         any(),
                         any());

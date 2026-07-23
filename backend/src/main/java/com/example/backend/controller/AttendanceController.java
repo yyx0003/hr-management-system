@@ -1,10 +1,13 @@
 package com.example.backend.controller;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +27,9 @@ import com.example.backend.dto.attendance.AttendanceCreateRequest;
 import com.example.backend.dto.attendance.AttendanceCsvImportResponse;
 import com.example.backend.dto.attendance.AttendanceListResponse;
 import com.example.backend.dto.attendance.AttendanceUpdateRequest;
+import com.example.backend.dto.csv.CsvFileData;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
+import com.example.backend.service.AttendanceCsvExportService;
 import com.example.backend.service.AttendanceCsvImportService;
 import com.example.backend.service.AttendanceRegistrationService;
 import com.example.backend.service.AttendanceUpdateService;
@@ -45,6 +50,7 @@ public class AttendanceController {
     private final AttendanceRegistrationService attendanceRegistrationService;
     private final AttendanceUpdateService attendanceUpdateService;
     private final AttendanceCsvImportService attendanceCsvImportService;
+    private final AttendanceCsvExportService attendanceCsvExportService;
     private final EmployeeService employeeService;
     private final MessageService messageService;
 
@@ -134,6 +140,59 @@ public class AttendanceController {
     }
 
     /**
+     * ログイン社員の勤怠CSVを出力する。
+     *
+     * GET /api/attendances/csv-export?targetMonth=2026-07
+     *
+     * @param targetMonth 出力対象年月（yyyy-MM）
+     * @param principal ログイン情報
+     * @return 勤怠CSVファイル
+     */
+    @GetMapping(
+            value = "/csv-export",
+            produces = "text/csv;charset=UTF-8")
+    public ResponseEntity<byte[]> exportAttendanceCsv(
+            @RequestParam(required = false)
+                    String targetMonth,
+            Principal principal) {
+
+        Long employeeId =
+                getLoginEmployeeId(principal);
+
+        String employeeNo =
+                principal.getName();
+
+        YearMonth targetYearMonth =
+                parseCsvExportTargetMonth(targetMonth);
+
+        CsvFileData csvFile =
+                attendanceCsvExportService.exportCsv(
+                        employeeId,
+                        employeeNo,
+                        targetYearMonth);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename(
+                                csvFile.getFileName(),
+                                StandardCharsets.UTF_8)
+                        .build());
+        headers.setContentType(
+                new MediaType(
+                        "text",
+                        "csv",
+                        StandardCharsets.UTF_8));
+        headers.setContentLength(
+                csvFile.getContent().length);
+
+        return new ResponseEntity<>(
+                csvFile.getContent(),
+                headers,
+                HttpStatus.OK);
+    }
+
+    /**
      * ログイン社員の勤怠CSVを取り込む。
      *
      * POST /api/attendances/csv-import
@@ -217,6 +276,32 @@ public class AttendanceController {
             throw new BusinessException(
                     messageService.getMessage(
                             "scr060.targetMonth.required"));
+        }
+
+        try {
+            return YearMonth.parse(targetMonth);
+        } catch (DateTimeParseException exception) {
+            throw new BusinessException(
+                    messageService.getMessage(
+                            "error.attendance.targetMonth.invalid"));
+        }
+    }
+
+    /**
+     * CSV出力対象年月をYearMonthへ変換する。
+     *
+     * @param targetMonth 対象年月文字列
+     * @return 対象年月
+     */
+    private YearMonth parseCsvExportTargetMonth(
+            String targetMonth) {
+
+        if (targetMonth == null
+                || targetMonth.isBlank()) {
+
+            throw new BusinessException(
+                    messageService.getMessage(
+                            "scr070.export.targetMonth.required"));
         }
 
         try {
