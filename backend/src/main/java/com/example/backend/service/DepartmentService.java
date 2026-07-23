@@ -41,6 +41,7 @@ public class DepartmentService {
     }
 
     /** 対象日時点で有効な部署リストを取得する. */
+    @Transactional
     public List<Department> findAllEffectiveAt(LocalDate targetDate) {
         List<Department> departments = departmentRepository.findAllEffectiveAt(targetDate);
         if (departments.isEmpty()) {
