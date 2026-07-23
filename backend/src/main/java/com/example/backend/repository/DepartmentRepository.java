@@ -12,20 +12,22 @@ import java.util.List;
 @Mapper
 public interface DepartmentRepository extends BaseMapper<Department> {
 
-    /** 対象部署の対象年月末日時点で有効なレコードを取得する（部署名は改定される可能性があるため）。 */
+    /** 対象部署の対象日付時点で有効なレコードを取得する（部署名は改定される可能性があるため）。 */
     @Select("""
             SELECT * FROM department
             WHERE department_id = #{departmentId}
-            AND start_date <= #{targetMonthEnd}
-            AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
+            AND start_date <= #{targetDate}
+            AND (end_date IS NULL OR end_date >= #{targetDate})
             """)
     Department findEffectiveAt(@Param("departmentId") Long departmentId,
-                                @Param("targetMonthEnd") LocalDate targetMonthEnd);
+                                @Param("targetDate") LocalDate targetDate);
     
+    /** 対象年月時点で有効なレコードを取得する */
     @Select("""
             SELECT * FROM department        
-            WHERE start_date <= #{targetMonthEnd}
+            WHERE start_date <= #{targetDate}
             AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
+            ORDER BY department_id
         """)
-    List<Department> findAllEffectiveAt(@Param("targetMonthEnd") LocalDate targetMonthEnd);
+    List<Department> findAllEffectiveAt(@Param("targetMonthEnd") LocalDate targetDate);
 }
