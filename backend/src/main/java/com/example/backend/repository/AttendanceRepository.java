@@ -20,9 +20,26 @@ public interface AttendanceRepository extends BaseMapper<Attendance> {
             ORDER BY work_date
             """)
     List<Attendance> findByEmployeeIdAndTargetMonth(@Param("employeeId") Long employeeId,
-                                                      @Param("targetMonthStart") LocalDate targetMonthStart,
-                                                      @Param("targetMonthEnd") LocalDate targetMonthEnd);
+            @Param("targetMonthStart") LocalDate targetMonthStart,
+            @Param("targetMonthEnd") LocalDate targetMonthEnd);
 
-    @Delete("DELETE FROM attendance WHERE employee_id = #{employeeId}")
-    int deleteByEmployeeId(@Param("employeeId") Long employeeId);
+    /**
+     * 対象社員・対象年月の勤怠情報を削除する。
+     */
+    @Delete("""
+            DELETE FROM attendance
+            WHERE employee_id = #{employeeId}
+            AND work_date BETWEEN #{targetMonthStart} AND #{targetMonthEnd}
+            """)
+    int deleteByEmployeeIdAndTargetMonth(
+            @Param("employeeId") Long employeeId,
+            @Param("targetMonthStart") LocalDate targetMonthStart,
+            @Param("targetMonthEnd") LocalDate targetMonthEnd);
+
+    @Delete("""
+            DELETE FROM attendance
+            WHERE employee_id = #{employeeId}
+            """)
+    int deleteByEmployeeId(
+            @Param("employeeId") Long employeeId);
 }
