@@ -6,6 +6,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,13 +16,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.common.MessageService;
 import com.example.backend.common.exception.BusinessException;
 import com.example.backend.dto.attendance.AttendanceCreateRequest;
+import com.example.backend.dto.attendance.AttendanceCsvImportResponse;
 import com.example.backend.dto.attendance.AttendanceListResponse;
 import com.example.backend.dto.attendance.AttendanceUpdateRequest;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
+import com.example.backend.service.AttendanceCsvImportService;
 import com.example.backend.service.AttendanceRegistrationService;
 import com.example.backend.service.AttendanceUpdateService;
 import com.example.backend.service.EmployeeService;
@@ -40,6 +44,7 @@ public class AttendanceController {
     private final MonthlyAttendanceListService monthlyAttendanceListService;
     private final AttendanceRegistrationService attendanceRegistrationService;
     private final AttendanceUpdateService attendanceUpdateService;
+    private final AttendanceCsvImportService attendanceCsvImportService;
     private final EmployeeService employeeService;
     private final MessageService messageService;
 
@@ -129,6 +134,46 @@ public class AttendanceController {
     }
 
     /**
+     * ログイン社員の勤怠CSVを取り込む。
+     *
+     * POST /api/attendances/csv-import
+     *
+     * @param targetMonth 取込対象年月（yyyy-MM）
+     * @param file CSVファイル
+     * @param principal ログイン情報
+     * @return CSV取込結果
+     */
+    @PostMapping(
+            value = "/csv-import",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AttendanceCsvImportResponse>
+            importAttendanceCsv(
+                    @RequestParam(required = false)
+                            String targetMonth,
+                    @RequestParam(required = false)
+                            MultipartFile file,
+                    Principal principal) {
+
+        Long employeeId =
+                getLoginEmployeeId(principal);
+
+        String employeeNo =
+                principal.getName();
+
+        YearMonth targetYearMonth =
+                parseCsvTargetMonth(targetMonth);
+
+        AttendanceCsvImportResponse response =
+                attendanceCsvImportService.importCsv(
+                        employeeId,
+                        employeeNo,
+                        targetYearMonth,
+                        file);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * ログイン社員IDを取得する。
      *
      * JWTのsubjectには社員番号が設定されているため、
@@ -172,6 +217,32 @@ public class AttendanceController {
             throw new BusinessException(
                     messageService.getMessage(
                             "scr060.targetMonth.required"));
+        }
+
+        try {
+            return YearMonth.parse(targetMonth);
+        } catch (DateTimeParseException exception) {
+            throw new BusinessException(
+                    messageService.getMessage(
+                            "error.attendance.targetMonth.invalid"));
+        }
+    }
+
+    /**
+     * CSV取込対象年月をYearMonthへ変換する。
+     *
+     * @param targetMonth 対象年月文字列
+     * @return 対象年月
+     */
+    private YearMonth parseCsvTargetMonth(
+            String targetMonth) {
+
+        if (targetMonth == null
+                || targetMonth.isBlank()) {
+
+            throw new BusinessException(
+                    messageService.getMessage(
+                            "scr070.targetMonth.required"));
         }
 
         try {

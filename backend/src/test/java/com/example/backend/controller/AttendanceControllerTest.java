@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -31,6 +32,7 @@ import com.example.backend.dto.attendance.AttendanceListItem;
 import com.example.backend.dto.attendance.AttendanceListResponse;
 import com.example.backend.dto.attendance.AttendanceUpdateRequest;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
+import com.example.backend.service.AttendanceCsvImportService;
 import com.example.backend.service.AttendanceRegistrationService;
 import com.example.backend.service.AttendanceUpdateService;
 import com.example.backend.service.EmployeeService;
@@ -56,6 +58,9 @@ class AttendanceControllerTest {
     private AttendanceUpdateService attendanceUpdateService;
 
     @Mock
+    private AttendanceCsvImportService attendanceCsvImportService;
+
+    @Mock
     private EmployeeService employeeService;
 
     @Mock
@@ -69,7 +74,8 @@ class AttendanceControllerTest {
 
         objectMapper =
                 new ObjectMapper()
-                        .registerModule(new JavaTimeModule())
+                        .registerModule(
+                                new JavaTimeModule())
                         .disable(
                                 SerializationFeature
                                         .WRITE_DATES_AS_TIMESTAMPS);
@@ -79,6 +85,7 @@ class AttendanceControllerTest {
                         monthlyAttendanceListService,
                         attendanceRegistrationService,
                         attendanceUpdateService,
+                        attendanceCsvImportService,
                         employeeService,
                         messageService);
 
@@ -135,16 +142,20 @@ class AttendanceControllerTest {
                         jsonPath("$.targetMonth")
                                 .value("2026-07"))
                 .andExpect(
-                        jsonPath("$.attendanceList[0].workDate")
+                        jsonPath(
+                                "$.attendanceList[0].workDate")
                                 .value("2026-07-01"))
                 .andExpect(
-                        jsonPath("$.attendanceList[0].attendanceTime")
+                        jsonPath(
+                                "$.attendanceList[0].attendanceTime")
                                 .value("09:00"))
                 .andExpect(
-                        jsonPath("$.attendanceList[0].leavingTime")
+                        jsonPath(
+                                "$.attendanceList[0].leavingTime")
                                 .value("18:00"))
                 .andExpect(
-                        jsonPath("$.attendanceList[0].workType")
+                        jsonPath(
+                                "$.attendanceList[0].workType")
                                 .value("NORMAL"));
 
         verify(employeeService)
@@ -250,10 +261,12 @@ class AttendanceControllerTest {
         mockMvc.perform(
                         post("/api/attendances")
                                 .principal(principal)
-                                .contentType("application/json")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
                                 .content(
-                                        objectMapper.writeValueAsString(
-                                                request)))
+                                        objectMapper
+                                                .writeValueAsString(
+                                                        request)))
                 .andExpect(status().isCreated());
 
         verify(attendanceRegistrationService)
@@ -282,10 +295,12 @@ class AttendanceControllerTest {
         mockMvc.perform(
                         put("/api/attendances/2026-07-22")
                                 .principal(principal)
-                                .contentType("application/json")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
                                 .content(
-                                        objectMapper.writeValueAsString(
-                                                request)))
+                                        objectMapper
+                                                .writeValueAsString(
+                                                        request)))
                 .andExpect(status().isNoContent());
 
         verify(attendanceUpdateService)
@@ -318,12 +333,14 @@ class AttendanceControllerTest {
         request.setWorkType("NORMAL");
 
         mockMvc.perform(
-                        put("/api/attendances/2026-07-xx")
+                        put("/api/attendances/invalid-date")
                                 .principal(principal)
-                                .contentType("application/json")
+                                .contentType(
+                                        MediaType.APPLICATION_JSON)
                                 .content(
-                                        objectMapper.writeValueAsString(
-                                                request)))
+                                        objectMapper
+                                                .writeValueAsString(
+                                                        request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(
                         jsonPath("$.success")
