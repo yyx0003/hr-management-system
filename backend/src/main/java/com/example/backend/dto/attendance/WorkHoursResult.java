@@ -6,6 +6,9 @@ import java.math.RoundingMode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
  
+/**
+ * 勤務時間と残業時間の計算結果。
+ */
 @Data
 @AllArgsConstructor
 public class WorkHoursResult {
@@ -24,7 +27,9 @@ public class WorkHoursResult {
     private BigDecimal overtimeHours;
  
     /**
-     * 0時間の結果を返す。
+     * 勤務時間と残業時間が0の結果を返す。
+     *
+     * @return 0時間の計算結果
      */
     public static WorkHoursResult zero() {
         BigDecimal zero = BigDecimal.ZERO.setScale(SCALE, ROUNDING);
@@ -32,7 +37,10 @@ public class WorkHoursResult {
     }
  
     /**
-     * 勤務時間を加算する。
+     * 指定された勤務時間を加算する。
+     *
+     * @param other 加算する勤務時間
+     * @return 加算後の計算結果
      */
     public WorkHoursResult add(WorkHoursResult other) {
         if (other == null) {
@@ -40,10 +48,14 @@ public class WorkHoursResult {
         }
  
         BigDecimal currentWorkHours =
-                workHours == null ? BigDecimal.ZERO : workHours;
+                workHours == null
+                        ? BigDecimal.ZERO
+                        : workHours;
  
         BigDecimal currentOvertimeHours =
-                overtimeHours == null ? BigDecimal.ZERO : overtimeHours;
+                overtimeHours == null
+                        ? BigDecimal.ZERO
+                        : overtimeHours;
  
         BigDecimal otherWorkHours =
                 other.getWorkHours() == null
@@ -56,7 +68,11 @@ public class WorkHoursResult {
                         : other.getOvertimeHours();
  
         return new WorkHoursResult(
-                currentWorkHours.add(otherWorkHours).setScale(SCALE, ROUNDING),
-                currentOvertimeHours.add(otherOvertimeHours).setScale(SCALE, ROUNDING));
+                currentWorkHours
+                        .add(otherWorkHours)
+                        .setScale(SCALE, ROUNDING),
+                currentOvertimeHours
+                        .add(otherOvertimeHours)
+                        .setScale(SCALE, ROUNDING));
     }
 }
