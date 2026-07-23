@@ -5,6 +5,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -22,15 +23,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.example.backend.common.MessageService;
 import com.example.backend.common.exception.GlobalExceptionHandler;
 import com.example.backend.dto.attendance.AttendanceCreateRequest;
+import com.example.backend.dto.attendance.AttendanceCsvImportResponse;
 import com.example.backend.dto.attendance.AttendanceListItem;
 import com.example.backend.dto.attendance.AttendanceListResponse;
 import com.example.backend.dto.attendance.AttendanceUpdateRequest;
+import com.example.backend.dto.attendance.CsvImportError;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
 import com.example.backend.service.AttendanceCsvImportService;
 import com.example.backend.service.AttendanceRegistrationService;
@@ -74,8 +78,7 @@ class AttendanceControllerTest {
 
         objectMapper =
                 new ObjectMapper()
-                        .registerModule(
-                                new JavaTimeModule())
+                        .registerModule(new JavaTimeModule())
                         .disable(
                                 SerializationFeature
                                         .WRITE_DATES_AS_TIMESTAMPS);
@@ -386,6 +389,243 @@ class AttendanceControllerTest {
                 employeeService,
                 never())
                 .getEmployeeDetail(any());
+    }
+
+    @Test
+    void importAttendanceCsvReturnsSuccess()
+            throws Exception {
+
+        when(principal.getName())
+                .thenReturn("1924");
+
+        when(employeeService.getEmployeeDetail("1924"))
+                .thenReturn(createEmployeeDetail());
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "attendance.csv",
+                        "text/csv",
+                        """
+                        employeeNo,workDate,attendanceTime,leavingTime,workType
+                        1924,2026-07-01,09:00,18:00,NORMAL
+                        """.getBytes());
+
+        AttendanceCsvImportResponse response =
+                new AttendanceCsvImportResponse(
+                        true,
+                        "勤怠CSVを取り込みました。読込件数：1、登録件数：1",
+                        List.of());
+
+        when(attendanceCsvImportService.importCsv(
+                1L,
+                "1924",
+                YearMonth.of(2026, 7),
+                file))
+                .thenReturn(response);
+
+        mockMvc.perform(
+                        multipart(
+                                "/api/attendances/csv-import")
+                                .file(file)
+                                .param(
+                                        "targetMonth",
+                                        "2026-07")
+                                .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(
+                        jsonPath("$.success")
+                                .value(true))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "勤怠CSVを取り込みました。読込件数：1、登録件数：1"))
+                .andExpect(
+                        jsonPath("$.errors")
+                                .isEmpty());
+
+        verify(employeeService)
+                .getEmployeeDetail("1924");
+
+        verify(attendanceCsvImportService)
+                .importCsv(
+                        1L,
+                        "1924",
+                        YearMonth.of(2026, 7),
+                        file);
+    }
+
+    @Test
+    void importAttendanceCsvReturnsValidationErrors()
+            throws Exception {
+
+        when(principal.getName())
+                .thenReturn("1924");
+
+        when(employeeService.getEmployeeDetail("1924"))
+                .thenReturn(createEmployeeDetail());
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "attendance.csv",
+                        "text/csv",
+                        """
+                        employeeNo,workDate,attendanceTime,leavingTime,workType
+                        9999,2026-07-01,09:00,18:00,NORMAL
+                        """.getBytes());
+
+        CsvImportError error =
+                new CsvImportError(
+                        2,
+                        "社員番号",
+                        "9999",
+                        "社員番号が一致しません。");
+
+        AttendanceCsvImportResponse response =
+                new AttendanceCsvImportResponse(
+                        false,
+                        "CSV内にエラーが存在します。",
+                        List.of(error));
+
+        when(attendanceCsvImportService.importCsv(
+                1L,
+                "1924",
+                YearMonth.of(2026, 7),
+                file))
+                .thenReturn(response);
+
+        mockMvc.perform(
+                        multipart(
+                                "/api/attendances/csv-import")
+                                .file(file)
+                                .param(
+                                        "targetMonth",
+                                        "2026-07")
+                                .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(
+                        jsonPath("$.success")
+                                .value(false))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "CSV内にエラーが存在します。"))
+                .andExpect(
+                        jsonPath("$.errors[0].lineNumber")
+                                .value(2))
+                .andExpect(
+                        jsonPath("$.errors[0].itemName")
+                                .value("社員番号"))
+                .andExpect(
+                        jsonPath("$.errors[0].value")
+                                .value("9999"))
+                .andExpect(
+                        jsonPath("$.errors[0].errorMessage")
+                                .value(
+                                        "社員番号が一致しません。"));
+
+        verify(attendanceCsvImportService)
+                .importCsv(
+                        1L,
+                        "1924",
+                        YearMonth.of(2026, 7),
+                        file);
+    }
+
+    @Test
+    void importAttendanceCsvWithoutTargetMonthReturnsBadRequest()
+            throws Exception {
+
+        when(principal.getName())
+                .thenReturn("1924");
+
+        when(employeeService.getEmployeeDetail("1924"))
+                .thenReturn(createEmployeeDetail());
+
+        when(messageService.getMessage(
+                "scr070.targetMonth.required"))
+                .thenReturn(
+                        "取込対象年月を指定してください。");
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "attendance.csv",
+                        "text/csv",
+                        "header".getBytes());
+
+        mockMvc.perform(
+                        multipart(
+                                "/api/attendances/csv-import")
+                                .file(file)
+                                .principal(principal))
+                .andExpect(status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.success")
+                                .value(false))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "取込対象年月を指定してください。"));
+
+        verify(
+                attendanceCsvImportService,
+                never())
+                .importCsv(
+                        any(),
+                        any(),
+                        any(),
+                        any());
+    }
+
+    @Test
+    void importAttendanceCsvWithInvalidTargetMonthReturnsBadRequest()
+            throws Exception {
+
+        when(principal.getName())
+                .thenReturn("1924");
+
+        when(employeeService.getEmployeeDetail("1924"))
+                .thenReturn(createEmployeeDetail());
+
+        when(messageService.getMessage(
+                "error.attendance.targetMonth.invalid"))
+                .thenReturn(
+                        "対象年月の形式が正しくありません（yyyy-MM）。");
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "attendance.csv",
+                        "text/csv",
+                        "header".getBytes());
+
+        mockMvc.perform(
+                        multipart(
+                                "/api/attendances/csv-import")
+                                .file(file)
+                                .param(
+                                        "targetMonth",
+                                        "2026/07")
+                                .principal(principal))
+                .andExpect(status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.success")
+                                .value(false))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "対象年月の形式が正しくありません（yyyy-MM）。"));
+
+        verify(
+                attendanceCsvImportService,
+                never())
+                .importCsv(
+                        any(),
+                        any(),
+                        any(),
+                        any());
     }
 
     private EmployeeDetailDTO createEmployeeDetail() {
