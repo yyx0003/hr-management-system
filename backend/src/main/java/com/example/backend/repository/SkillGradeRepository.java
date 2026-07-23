@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Mapper
 public interface SkillGradeRepository extends BaseMapper<SkillGrade> {
@@ -15,9 +16,17 @@ public interface SkillGradeRepository extends BaseMapper<SkillGrade> {
     @Select("""
             SELECT * FROM skill_grade
             WHERE skill_grade = #{skillGrade}
-            AND start_date <= #{targetMonthEnd}
-            AND (end_date IS NULL OR end_date >= #{targetMonthEnd})
+            AND start_date <= #{targetDate}
+            AND (end_date IS NULL OR end_date >= #{targetDate})
             """)
     SkillGrade findEffectiveAt(@Param("skillGrade") Integer skillGrade,
-                                @Param("targetMonthEnd") LocalDate targetMonthEnd);
+                                @Param("targetDate") LocalDate targetDate);
+
+        /** 対象等級の対象年月末日時点で有効な手当額を取得する。 */
+    @Select("""
+            SELECT * FROM skill_grade
+            WHERE start_date <= #{targetDate}
+            AND (end_date IS NULL OR end_date >= #{targetDate})
+            """)
+    List<SkillGrade> findAllEffectiveAt(@Param("targetDate") LocalDate targetDate);
 }
