@@ -26,6 +26,8 @@
 -- ---------------------------------------------------------------------
 -- 社員（employee）
 -- ---------------------------------------------------------------------
+CREATE SEQUENCE employee_no_seq START WITH 1 INCREMENT BY 1;
+
 CREATE TABLE employee (
     employee_id      BIGSERIAL       NOT NULL,  -- 【注意】新規社員登録時はDB自動採番でよいが、
                                                  -- 履歴行（部署・役職・職能資格の変更）追加時は

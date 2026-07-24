@@ -2,16 +2,21 @@ package com.example.backend.controller;
 
 import com.example.backend.common.MessageService;
 import com.example.backend.common.exception.BusinessException;
+import com.example.backend.dto.employee.EmployeeCreateRequest;
+import com.example.backend.dto.employee.EmployeeCreateResponse;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
 import com.example.backend.dto.employee.EmployeeListDTO;
 import com.example.backend.service.EmployeeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -25,6 +30,13 @@ public class EmployeeController {
     public EmployeeController(EmployeeService employeeService, MessageService messageService) {
         this.employeeService = employeeService;
         this.messageService = messageService;
+    }
+
+    @PostMapping
+    public ResponseEntity<EmployeeCreateResponse> createEmployee(
+            @Valid @RequestBody EmployeeCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(employeeService.createEmployee(request));
     }
 
     @GetMapping

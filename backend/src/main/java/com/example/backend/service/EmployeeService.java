@@ -1,16 +1,25 @@
 package com.example.backend.service;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.common.MessageService;
 import com.example.backend.common.exception.BusinessException;
+import com.example.backend.dto.employee.EmployeeCreateRequest;
+import com.example.backend.dto.employee.EmployeeCreateResponse;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
 import com.example.backend.dto.employee.EmployeeListDTO;
+import com.example.backend.dto.employee.EmployeeQualificationCreateRequest;
 import com.example.backend.dto.employee.QualificationDetailDTO;
 import com.example.backend.entity.Employee;
+import com.example.backend.entity.EmployeeQualification;
 import com.example.backend.repository.EmployeeQualificationRepository;
 import com.example.backend.repository.EmployeeRepository;
 
@@ -28,6 +37,58 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final EmployeeQualificationRepository employeeQualificationRepository;
     private final MessageService messageService;
+    private final DepartmentService departmentService;
+    private final PositionService positionService;
+    private final SkillGradeService skillGradeService;
+    private final QualificationService qualificationService;
+    private final PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public EmployeeCreateResponse createEmployee(EmployeeCreateRequest request) {
+        validateRetireDate(request);
+        List<EmployeeQualificationCreateRequest> qualifications = request.qualifications() == null
+                ? Collections.emptyList()
+                : request.qualifications();
+        validateDuplicateQualifications(qualifications);
+
+        departmentService.findEffectiveAt(request.departmentId(), request.hireDate());
+        skillGradeService.findEffectiveAt(request.skillGrade(), request.hireDate());
+        if (request.positionId() != null) {
+            positionService.findEffectiveAt(request.positionId(), request.hireDate());
+        }
+        for (EmployeeQualificationCreateRequest qualification : qualifications) {
+            qualificationService.findEffectiveAt(qualification.qualificationId(), request.hireDate());
+        }
+
+        String employeeNo = nextEmployeeNo();
+        Employee employee = new Employee();
+        employee.setStartDate(request.hireDate());
+        employee.setEmployeeNo(employeeNo);
+        employee.setPasswordHash(passwordEncoder.encode(employeeNo));
+        employee.setEmployeeName(request.employeeName());
+        employee.setBirthDate(request.birthDate());
+        employee.setPostalCode(request.postalCode());
+        employee.setAddress(request.address());
+        employee.setPhoneNumber(request.phoneNumber());
+        employee.setEmailAddress(request.emailAddress());
+        employee.setHireDate(request.hireDate());
+        employee.setRetireDate(request.retireDate());
+        employee.setDepartmentId(request.departmentId());
+        employee.setSkillGrade(request.skillGrade());
+        employee.setPositionId(request.positionId());
+        employee.setEndDate(null);
+        employeeRepository.insert(employee);
+
+        for (EmployeeQualificationCreateRequest qualification : qualifications) {
+            EmployeeQualification employeeQualification = new EmployeeQualification();
+            employeeQualification.setEmployeeId(employee.getEmployeeId());
+            employeeQualification.setQualificationId(qualification.qualificationId());
+            employeeQualification.setAcquisitionDate(qualification.acquisitionDate());
+            employeeQualificationRepository.insert(employeeQualification);
+        }
+
+        return new EmployeeCreateResponse(employee.getEmployeeId(), employeeNo);
+    }
 
     public java.util.List<EmployeeListDTO> searchEmployees(
             String employeeNo, String employeeName, Long departmentId) {
@@ -122,5 +183,37 @@ public class EmployeeService {
         return value.replace("!", "!!")
                 .replace("%", "!%")
                 .replace("_", "!_");
+    }
+
+    private String nextEmployeeNo() {
+        long sequenceValue = employeeRepository.nextEmployeeNoSequenceValue();
+        if (sequenceValue > 9999) {
+            throw new BusinessException(
+                    HttpStatus.BAD_REQUEST,
+                    messageService.getMessage("error.employee.number.exhausted"));
+        }
+        return String.format("%04d", sequenceValue);
+    }
+
+    private void validateDuplicateQualifications(
+            List<EmployeeQualificationCreateRequest> qualifications) {
+        Set<Long> qualificationIds = new HashSet<>();
+        for (EmployeeQualificationCreateRequest qualification : qualifications) {
+            if (!qualificationIds.add(qualification.qualificationId())) {
+                throw new BusinessException(
+                        HttpStatus.BAD_REQUEST,
+                        messageService.getMessage(
+                                "error.employee.qualification.duplicate",
+                                qualification.qualificationId()));
+            }
+        }
+    }
+
+    private void validateRetireDate(EmployeeCreateRequest request) {
+        if (request.retireDate() != null && request.retireDate().isBefore(request.hireDate())) {
+            throw new BusinessException(
+                    HttpStatus.BAD_REQUEST,
+                    messageService.getMessage("error.employee.retireDate.beforeHireDate"));
+        }
     }
 }

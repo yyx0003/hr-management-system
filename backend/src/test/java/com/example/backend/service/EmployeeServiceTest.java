@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -13,17 +15,23 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.example.backend.common.MessageService;
 import com.example.backend.common.exception.BusinessException;
 import com.example.backend.entity.Employee;
 import com.example.backend.entity.EmployeeQualification;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
+import com.example.backend.dto.employee.EmployeeCreateRequest;
+import com.example.backend.dto.employee.EmployeeCreateResponse;
+import com.example.backend.dto.employee.EmployeeQualificationCreateRequest;
 import com.example.backend.dto.employee.EmployeeListDTO;
 import com.example.backend.repository.EmployeeQualificationRepository;
 import com.example.backend.repository.EmployeeRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
@@ -41,6 +49,72 @@ class EmployeeServiceTest {
     @Mock
     private MessageService messageService;
 
+    @Mock
+    private DepartmentService departmentService;
+
+    @Mock
+    private PositionService positionService;
+
+    @Mock
+    private SkillGradeService skillGradeService;
+
+    @Mock
+    private QualificationService qualificationService;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Test
+    void createEmployeeSetsInitialValuesAndRegistersQualifications() {
+        LocalDate hireDate = LocalDate.of(2026, 7, 1);
+        EmployeeCreateRequest request = new EmployeeCreateRequest(
+                "Taro Yamada", LocalDate.of(1990, 1, 2), "1000001", "Tokyo",
+                null, null, hireDate, null, 1L, 3, null,
+                List.of(new EmployeeQualificationCreateRequest(10L, LocalDate.of(2020, 1, 1))));
+        when(employeeRepository.nextEmployeeNoSequenceValue()).thenReturn(1L);
+        doAnswer(invocation -> {
+            Employee employee = invocation.getArgument(0);
+            employee.setEmployeeId(99L);
+            return 1;
+        }).when(employeeRepository).insert(any(Employee.class));
+        EmployeeService service = new EmployeeService(
+                employeeRepository, employeeQualificationRepository, messageService,
+                departmentService, positionService, skillGradeService, qualificationService,
+                new BCryptPasswordEncoder());
+
+        EmployeeCreateResponse result = service.createEmployee(request);
+
+        assertThat(result).isEqualTo(new EmployeeCreateResponse(99L, "0001"));
+        verify(departmentService).findEffectiveAt(1L, hireDate);
+        verify(skillGradeService).findEffectiveAt(3, hireDate);
+        verify(positionService, never()).findEffectiveAt(any(), any());
+        verify(qualificationService).findEffectiveAt(10L, hireDate);
+        verify(employeeQualificationRepository).insert(any(EmployeeQualification.class));
+        ArgumentCaptor<Employee> employeeCaptor = ArgumentCaptor.forClass(Employee.class);
+        verify(employeeRepository).insert(employeeCaptor.capture());
+        assertThat(new BCryptPasswordEncoder().matches("0001", employeeCaptor.getValue().getPasswordHash()))
+                .isTrue();
+    }
+
+    @Test
+    void createEmployeeRejectsDuplicateQualifications() {
+        EmployeeCreateRequest request = new EmployeeCreateRequest(
+                "Taro", LocalDate.of(1990, 1, 2), "1000001", "Tokyo", null, null,
+                LocalDate.of(2026, 7, 1), null, 1L, 3, null,
+                List.of(new EmployeeQualificationCreateRequest(10L, LocalDate.of(2020, 1, 1)),
+                        new EmployeeQualificationCreateRequest(10L, LocalDate.of(2021, 1, 1))));
+        when(messageService.getMessage("error.employee.qualification.duplicate", 10L))
+                .thenReturn("duplicate");
+        EmployeeService service = new EmployeeService(
+                employeeRepository, employeeQualificationRepository, messageService,
+                departmentService, positionService, skillGradeService, qualificationService, passwordEncoder);
+
+        assertThatThrownBy(() -> service.createEmployee(request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("duplicate");
+        verify(employeeRepository, never()).insert(any(Employee.class));
+    }
+
     @Test
     void getEffectiveEmployeeReturnsRepositoryEmployee() {
         Employee employee = new Employee();
@@ -50,7 +124,8 @@ class EmployeeServiceTest {
                 .thenReturn(employee);
 
         EmployeeService service = new EmployeeService(
-                employeeRepository, employeeQualificationRepository, messageService);
+                employeeRepository, employeeQualificationRepository, messageService,
+                departmentService, positionService, skillGradeService, qualificationService, passwordEncoder);
 
         Employee result = service.getEffectiveEmployee(EMPLOYEE_NO, REFERENCE_DATE);
 
@@ -66,7 +141,8 @@ class EmployeeServiceTest {
         when(messageService.getMessage("error.employee.notfound", EMPLOYEE_NO))
                 .thenReturn(NOT_FOUND_MESSAGE);
         EmployeeService service = new EmployeeService(
-                employeeRepository, employeeQualificationRepository, messageService);
+                employeeRepository, employeeQualificationRepository, messageService,
+                departmentService, positionService, skillGradeService, qualificationService, passwordEncoder);
 
         assertThatThrownBy(() -> service.getEffectiveEmployee(EMPLOYEE_NO, REFERENCE_DATE))
                 .isInstanceOf(BusinessException.class)
@@ -102,7 +178,8 @@ class EmployeeServiceTest {
         when(employeeQualificationRepository.findByEmployeeIdOrderByAcquisitionDate(1L))
                 .thenReturn(List.of(first, second));
         EmployeeService service = new EmployeeService(
-                employeeRepository, employeeQualificationRepository, messageService);
+                employeeRepository, employeeQualificationRepository, messageService,
+                departmentService, positionService, skillGradeService, qualificationService, passwordEncoder);
 
         EmployeeDetailDTO result = service.getEmployeeDetail(EMPLOYEE_NO);
 
@@ -138,7 +215,8 @@ class EmployeeServiceTest {
         when(employeeQualificationRepository.findByEmployeeIdOrderByAcquisitionDate(1L))
                 .thenReturn(List.of());
         EmployeeService service = new EmployeeService(
-                employeeRepository, employeeQualificationRepository, messageService);
+                employeeRepository, employeeQualificationRepository, messageService,
+                departmentService, positionService, skillGradeService, qualificationService, passwordEncoder);
 
         EmployeeDetailDTO result = service.getEmployeeDetail(EMPLOYEE_NO);
 
@@ -153,7 +231,8 @@ class EmployeeServiceTest {
                 eq("12!%!_\\"), eq("A!_B"), eq(2L), any(LocalDate.class)))
                 .thenReturn(List.of(employee));
         EmployeeService service = new EmployeeService(
-                employeeRepository, employeeQualificationRepository, messageService);
+                employeeRepository, employeeQualificationRepository, messageService,
+                departmentService, positionService, skillGradeService, qualificationService, passwordEncoder);
 
         List<EmployeeListDTO> result = service.searchEmployees("12%_\\", "A_B", 2L);
 
