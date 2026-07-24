@@ -6,11 +6,14 @@ import com.example.backend.dto.employee.EmployeeCreateRequest;
 import com.example.backend.dto.employee.EmployeeCreateResponse;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
 import com.example.backend.dto.employee.EmployeeListDTO;
+import com.example.backend.dto.employee.EmployeeUpdateRequest;
+import com.example.backend.dto.employee.EmployeeUpdateResponse;
 import com.example.backend.service.EmployeeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +40,14 @@ public class EmployeeController {
             @Valid @RequestBody EmployeeCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(employeeService.createEmployee(request));
+    }
+
+    @PutMapping("/{employeeNo}")
+    public ResponseEntity<EmployeeUpdateResponse> updateEmployee(
+            @PathVariable String employeeNo,
+            @Valid @RequestBody EmployeeUpdateRequest request) {
+        validateEmployeeNo(employeeNo);
+        return ResponseEntity.ok(employeeService.updateEmployee(employeeNo, request));
     }
 
     @GetMapping

@@ -2,7 +2,10 @@ package com.example.backend.service;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,9 @@ import com.example.backend.dto.employee.EmployeeCreateResponse;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
 import com.example.backend.dto.employee.EmployeeListDTO;
 import com.example.backend.dto.employee.EmployeeQualificationCreateRequest;
+import com.example.backend.dto.employee.EmployeeQualificationUpdateRequest;
+import com.example.backend.dto.employee.EmployeeUpdateRequest;
+import com.example.backend.dto.employee.EmployeeUpdateResponse;
 import com.example.backend.dto.employee.QualificationDetailDTO;
 import com.example.backend.entity.Employee;
 import com.example.backend.entity.EmployeeQualification;
@@ -90,6 +96,42 @@ public class EmployeeService {
         return new EmployeeCreateResponse(employee.getEmployeeId(), employeeNo);
     }
 
+    @Transactional
+    public EmployeeUpdateResponse updateEmployee(String employeeNo, EmployeeUpdateRequest request) {
+        LocalDate updateDate = LocalDate.now();
+        LocalDate nextMonthStart = updateDate.withDayOfMonth(1).plusMonths(1);
+        Employee current = employeeRepository
+                .findEffectiveAndEmployedByEmployeeNoAtForUpdate(employeeNo, updateDate);
+        if (current == null) {
+            throw employeeNotFound(employeeNo);
+        }
+
+        validateRetireDate(request.retireDate(), current.getHireDate());
+        List<EmployeeQualificationUpdateRequest> qualifications = request.qualifications() == null
+                ? Collections.emptyList()
+                : request.qualifications();
+        validateDuplicateUpdateQualifications(qualifications);
+        validateUpdateMasters(request, qualifications, nextMonthStart, updateDate);
+
+        Employee scheduled = employeeRepository.findByEmployeeNoAndStartDate(employeeNo, nextMonthStart);
+        updatePersonalInfo(current, request);
+        if (scheduled != null) {
+            updateScheduledHistory(scheduled, request);
+        } else if (organizationChanged(current, request)) {
+            int updated = employeeRepository.updateEndDate(
+                    current.getEmployeeId(), current.getStartDate(), nextMonthStart.minusDays(1));
+            requireOneEmployeeHistoryUpdate(updated);
+            requireOneEmployeeHistoryUpdate(
+                    employeeRepository.insert(createNextHistory(current, request, nextMonthStart)));
+        }
+
+        if (employeeRepository.updateRetireDateByEmployeeId(current.getEmployeeId(), request.retireDate()) <= 0) {
+            throw employeeUpdateConflict();
+        }
+        synchronizeQualifications(current.getEmployeeId(), qualifications);
+        return new EmployeeUpdateResponse(current.getEmployeeId(), current.getEmployeeNo());
+    }
+
     public java.util.List<EmployeeListDTO> searchEmployees(
             String employeeNo, String employeeName, Long departmentId) {
         return employeeRepository.searchEffectiveAndEmployed(
@@ -133,8 +175,7 @@ public class EmployeeService {
                 referenceDate);
 
         if (employee == null) {
-            String message = messageService.getMessage("error.employee.notfound", employeeNo);
-            throw new BusinessException(HttpStatus.NOT_FOUND, message);
+            throw employeeNotFound(employeeNo);
         }
 
         return employee;
@@ -209,11 +250,144 @@ public class EmployeeService {
         }
     }
 
+    private void validateDuplicateUpdateQualifications(
+            List<EmployeeQualificationUpdateRequest> qualifications) {
+        Set<Long> qualificationIds = new HashSet<>();
+        for (EmployeeQualificationUpdateRequest qualification : qualifications) {
+            if (!qualificationIds.add(qualification.qualificationId())) {
+                throw new BusinessException(
+                        HttpStatus.BAD_REQUEST,
+                        messageService.getMessage(
+                                "error.employee.qualification.duplicate",
+                                qualification.qualificationId()));
+            }
+        }
+    }
+
     private void validateRetireDate(EmployeeCreateRequest request) {
-        if (request.retireDate() != null && request.retireDate().isBefore(request.hireDate())) {
+        validateRetireDate(request.retireDate(), request.hireDate());
+    }
+
+    private void validateRetireDate(LocalDate retireDate, LocalDate hireDate) {
+        if (retireDate != null && retireDate.isBefore(hireDate)) {
             throw new BusinessException(
                     HttpStatus.BAD_REQUEST,
                     messageService.getMessage("error.employee.retireDate.beforeHireDate"));
         }
+    }
+
+    private void validateUpdateMasters(EmployeeUpdateRequest request,
+                                       List<EmployeeQualificationUpdateRequest> qualifications,
+                                       LocalDate nextMonthStart,
+                                       LocalDate updateDate) {
+        departmentService.findEffectiveAt(request.departmentId(), nextMonthStart);
+        skillGradeService.findEffectiveAt(request.skillGrade(), nextMonthStart);
+        if (request.positionId() != null) {
+            positionService.findEffectiveAt(request.positionId(), nextMonthStart);
+        }
+        for (EmployeeQualificationUpdateRequest qualification : qualifications) {
+            qualificationService.findEffectiveAt(qualification.qualificationId(), updateDate);
+        }
+    }
+
+    private void updatePersonalInfo(Employee employee, EmployeeUpdateRequest request) {
+        requireOneEmployeeHistoryUpdate(employeeRepository.updatePersonalInfo(employee.getEmployeeId(), employee.getStartDate(),
+                request.employeeName(), request.birthDate(), request.postalCode(), request.address(),
+                request.phoneNumber(), request.emailAddress()));
+    }
+
+    private void updateScheduledHistory(Employee employee, EmployeeUpdateRequest request) {
+        requireOneEmployeeHistoryUpdate(employeeRepository.updateScheduledHistory(employee.getEmployeeId(), employee.getStartDate(),
+                request.employeeName(), request.birthDate(), request.postalCode(), request.address(),
+                request.phoneNumber(), request.emailAddress(), request.departmentId(), request.positionId(),
+                request.skillGrade()));
+    }
+
+    private boolean organizationChanged(Employee current, EmployeeUpdateRequest request) {
+        return !Objects.equals(current.getDepartmentId(), request.departmentId())
+                || !Objects.equals(current.getPositionId(), request.positionId())
+                || !Objects.equals(current.getSkillGrade(), request.skillGrade());
+    }
+
+    private Employee createNextHistory(Employee current, EmployeeUpdateRequest request,
+                                       LocalDate nextMonthStart) {
+        Employee next = new Employee();
+        next.setEmployeeId(current.getEmployeeId());
+        next.setStartDate(nextMonthStart);
+        next.setEmployeeNo(current.getEmployeeNo());
+        next.setPasswordHash(current.getPasswordHash());
+        next.setEmployeeName(request.employeeName());
+        next.setBirthDate(request.birthDate());
+        next.setPostalCode(request.postalCode());
+        next.setAddress(request.address());
+        next.setPhoneNumber(request.phoneNumber());
+        next.setEmailAddress(request.emailAddress());
+        next.setHireDate(current.getHireDate());
+        next.setRetireDate(request.retireDate());
+        next.setDepartmentId(request.departmentId());
+        next.setPositionId(request.positionId());
+        next.setSkillGrade(request.skillGrade());
+        next.setEndDate(null);
+        return next;
+    }
+
+    private void synchronizeQualifications(Long employeeId,
+                                            List<EmployeeQualificationUpdateRequest> requestedQualifications) {
+        Map<Long, EmployeeQualification> existingById = new HashMap<>();
+        for (EmployeeQualification existing :
+                employeeQualificationRepository.findByEmployeeIdOrderByAcquisitionDate(employeeId)) {
+            existingById.put(existing.getQualificationId(), existing);
+        }
+
+        Set<Long> requestedIds = new HashSet<>();
+        for (EmployeeQualificationUpdateRequest requested : requestedQualifications) {
+            requestedIds.add(requested.qualificationId());
+        }
+        for (Long existingId : existingById.keySet()) {
+            if (!requestedIds.contains(existingId)) {
+                requireOneQualificationUpdate(employeeQualificationRepository
+                        .deleteByEmployeeIdAndQualificationId(employeeId, existingId));
+            }
+        }
+        for (EmployeeQualificationUpdateRequest requested : requestedQualifications) {
+            EmployeeQualification existing = existingById.get(requested.qualificationId());
+            if (existing == null) {
+                EmployeeQualification qualification = new EmployeeQualification();
+                qualification.setEmployeeId(employeeId);
+                qualification.setQualificationId(requested.qualificationId());
+                qualification.setAcquisitionDate(requested.acquisitionDate());
+                requireOneQualificationUpdate(employeeQualificationRepository.insert(qualification));
+            } else if (!Objects.equals(existing.getAcquisitionDate(), requested.acquisitionDate())) {
+                requireOneQualificationUpdate(employeeQualificationRepository.updateAcquisitionDate(
+                        employeeId, requested.qualificationId(), requested.acquisitionDate()));
+            }
+        }
+    }
+
+    private void requireOneEmployeeHistoryUpdate(int updatedRows) {
+        if (updatedRows != 1) {
+            throw employeeUpdateConflict();
+        }
+    }
+
+    private void requireOneQualificationUpdate(int updatedRows) {
+        if (updatedRows != 1) {
+            throw employeeQualificationUpdateConflict();
+        }
+    }
+
+    private BusinessException employeeUpdateConflict() {
+        return new BusinessException(HttpStatus.CONFLICT,
+                messageService.getMessage("error.employee.update.conflict"));
+    }
+
+    private BusinessException employeeQualificationUpdateConflict() {
+        return new BusinessException(HttpStatus.CONFLICT,
+                messageService.getMessage("error.employee.qualification.update.conflict"));
+    }
+
+    private BusinessException employeeNotFound(String employeeNo) {
+        return new BusinessException(HttpStatus.NOT_FOUND,
+                messageService.getMessage("error.employee.notfound", employeeNo));
     }
 }
