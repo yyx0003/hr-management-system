@@ -131,4 +131,7 @@ public interface EmployeeRepository extends BaseMapper<Employee> {
 
     @Select("SELECT COUNT(*) > 0 FROM employee WHERE employee_no = #{employeeNo}")
     boolean existsByEmployeeNo(@Param("employeeNo") String employeeNo);
+
+    @Select("SELECT nextval('employee_no_seq')")
+    long nextEmployeeNoSequenceValue();
 }

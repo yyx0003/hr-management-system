@@ -47,6 +47,16 @@ class SecurityConfigTest {
     }
 
     @Test
+    void createEmployeeRequiresJwt() throws Exception {
+        mockMvc.perform(post("/api/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"employeeName":"Taro Yamada","birthDate":"1990-01-02","postalCode":"1000001","address":"Tokyo","hireDate":"2026-07-01","departmentId":1,"skillGrade":3}
+                                """))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void corsAllowsFrontendOrigin() throws Exception {
         mockMvc.perform(options("/api/auth/login")
                         .header("Origin", "http://localhost:5173")

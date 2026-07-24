@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.common.MessageService;
 import com.example.backend.common.exception.BusinessException;
 import com.example.backend.common.exception.GlobalExceptionHandler;
+import com.example.backend.dto.employee.EmployeeCreateResponse;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
 import com.example.backend.dto.employee.QualificationDetailDTO;
 import com.example.backend.service.EmployeeService;
@@ -25,7 +26,9 @@ import java.util.List;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -72,6 +75,31 @@ class EmployeeControllerTest {
                 .andExpect(jsonPath("$.positionId").value(3))
                 .andExpect(jsonPath("$.skillGrade").value(4))
                 .andExpect(jsonPath("$.qualifications").isArray());
+    }
+
+    @Test
+    void createEmployeeReturnsCreatedWithGeneratedIdentifiers() throws Exception {
+        when(employeeService.createEmployee(any()))
+                .thenReturn(new EmployeeCreateResponse(1L, "0001"));
+
+        mockMvc.perform(post("/api/employees")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"employeeName":"Taro Yamada","birthDate":"1990-01-02","postalCode":"1000001","address":"Tokyo","hireDate":"2026-07-01","departmentId":1,"skillGrade":3}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.employeeId").value(1))
+                .andExpect(jsonPath("$.employeeNo").value("0001"));
+    }
+
+    @Test
+    void createEmployeeReturnsBadRequestForBeanValidationError() throws Exception {
+        mockMvc.perform(post("/api/employees")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").exists());
     }
 
     @Test
