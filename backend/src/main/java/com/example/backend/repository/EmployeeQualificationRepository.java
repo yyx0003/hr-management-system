@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -21,4 +22,19 @@ public interface EmployeeQualificationRepository extends BaseMapper<EmployeeQual
 
     @Delete("DELETE FROM employee_qualification WHERE employee_id = #{employeeId}")
     int deleteByEmployeeId(@Param("employeeId") Long employeeId);
+
+    @Update("""
+            UPDATE employee_qualification SET acquisition_date = #{acquisitionDate}
+            WHERE employee_id = #{employeeId} AND qualification_id = #{qualificationId}
+            """)
+    int updateAcquisitionDate(@Param("employeeId") Long employeeId,
+                              @Param("qualificationId") Long qualificationId,
+                              @Param("acquisitionDate") java.time.LocalDate acquisitionDate);
+
+    @Delete("""
+            DELETE FROM employee_qualification
+            WHERE employee_id = #{employeeId} AND qualification_id = #{qualificationId}
+            """)
+    int deleteByEmployeeIdAndQualificationId(@Param("employeeId") Long employeeId,
+                                             @Param("qualificationId") Long qualificationId);
 }

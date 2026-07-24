@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -77,6 +78,71 @@ public interface EmployeeRepository extends BaseMapper<Employee> {
             """)
     Employee findEffectiveAndEmployedByEmployeeNoAt(@Param("employeeNo") String employeeNo,
                                                      @Param("referenceDate") LocalDate referenceDate);
+
+    @Select("""
+            SELECT * FROM employee
+            WHERE employee_no = #{employeeNo}
+            AND start_date <= #{referenceDate}
+            AND (end_date IS NULL OR end_date >= #{referenceDate})
+            AND (retire_date IS NULL OR retire_date >= #{referenceDate})
+            FOR UPDATE
+            """)
+    Employee findEffectiveAndEmployedByEmployeeNoAtForUpdate(
+            @Param("employeeNo") String employeeNo,
+            @Param("referenceDate") LocalDate referenceDate);
+
+    @Select("""
+            SELECT * FROM employee
+            WHERE employee_no = #{employeeNo} AND start_date = #{startDate}
+            """)
+    Employee findByEmployeeNoAndStartDate(@Param("employeeNo") String employeeNo,
+                                           @Param("startDate") LocalDate startDate);
+
+    @Update("""
+            UPDATE employee SET employee_name = #{employeeName}, birth_date = #{birthDate},
+                postal_code = #{postalCode}, address = #{address}, phone_number = #{phoneNumber},
+                email_address = #{emailAddress}
+            WHERE employee_id = #{employeeId} AND start_date = #{startDate}
+            """)
+    int updatePersonalInfo(@Param("employeeId") Long employeeId,
+                           @Param("startDate") LocalDate startDate,
+                           @Param("employeeName") String employeeName,
+                           @Param("birthDate") LocalDate birthDate,
+                           @Param("postalCode") String postalCode,
+                           @Param("address") String address,
+                           @Param("phoneNumber") String phoneNumber,
+                           @Param("emailAddress") String emailAddress);
+
+    @Update("""
+            UPDATE employee SET employee_name = #{employeeName}, birth_date = #{birthDate},
+                postal_code = #{postalCode}, address = #{address}, phone_number = #{phoneNumber},
+                email_address = #{emailAddress}, department_id = #{departmentId},
+                position_id = #{positionId}, skill_grade = #{skillGrade}
+            WHERE employee_id = #{employeeId} AND start_date = #{startDate}
+            """)
+    int updateScheduledHistory(@Param("employeeId") Long employeeId,
+                               @Param("startDate") LocalDate startDate,
+                               @Param("employeeName") String employeeName,
+                               @Param("birthDate") LocalDate birthDate,
+                               @Param("postalCode") String postalCode,
+                               @Param("address") String address,
+                               @Param("phoneNumber") String phoneNumber,
+                               @Param("emailAddress") String emailAddress,
+                               @Param("departmentId") Long departmentId,
+                               @Param("positionId") Long positionId,
+                               @Param("skillGrade") Integer skillGrade);
+
+    @Update("""
+            UPDATE employee SET end_date = #{endDate}
+            WHERE employee_id = #{employeeId} AND start_date = #{startDate} AND end_date IS NULL
+            """)
+    int updateEndDate(@Param("employeeId") Long employeeId,
+                      @Param("startDate") LocalDate startDate,
+                      @Param("endDate") LocalDate endDate);
+
+    @Update("UPDATE employee SET retire_date = #{retireDate} WHERE employee_id = #{employeeId}")
+    int updateRetireDateByEmployeeId(@Param("employeeId") Long employeeId,
+                                     @Param("retireDate") LocalDate retireDate);
 
     @Select("""
             <script>
