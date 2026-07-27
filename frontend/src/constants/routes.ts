@@ -1,0 +1,15 @@
+export const ROUTES = {
+  login: '/login',
+  menu: '/menu',
+  employees: '/employees',
+  employeeNew: '/employees/new',
+  employeeDetail: '/employees/:employeeNo',
+  employeeEdit: '/employees/:employeeNo/edit',
+  attendances: '/attendances',
+  attendanceImport: '/attendances/import',
+  csvExport: '/csv-export',
+  department: '/department',
+  position: '/position',
+  qualification: '/qualification',
+  skillgrade: '/skillgrade',
+} as const
