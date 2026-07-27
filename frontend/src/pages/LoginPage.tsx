@@ -1,11 +1,12 @@
 import axios from 'axios'
 import { type FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MESSAGES } from '../constants/messages'
 import { ROUTES } from '../constants/routes'
 import { login } from '../features/auth/authApi'
 import { saveAuth } from '../features/auth/authStorage'
+import { AUTH_MESSAGES } from '../features/auth/messages'
 import type { ApiErrorResponse } from '../features/auth/types'
+import { COMMON_MESSAGES } from '../messages/commonMessages'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -20,8 +21,8 @@ export function LoginPage() {
     event.preventDefault()
     if (isSubmitting) return
 
-    const nextEmployeeNoError = employeeNo.trim() ? '' : '社員番号を入力してください。'
-    const nextPasswordError = password ? '' : 'パスワードを入力してください。'
+    const nextEmployeeNoError = employeeNo.trim() ? '' : AUTH_MESSAGES.employeeNoRequired
+    const nextPasswordError = password ? '' : AUTH_MESSAGES.passwordRequired
 
     setEmployeeNoError(nextEmployeeNoError)
     setPasswordError(nextPasswordError)
@@ -102,9 +103,9 @@ function getDescribedBy(fieldError: string, formError: string, fieldErrorId: str
 function getLoginErrorMessage(error: unknown) {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
     if (error.response?.status === 400 || error.response?.status === 401) {
-      return error.response.data?.message || MESSAGES.loginFailed
+      return error.response.data?.message || AUTH_MESSAGES.loginFailed
     }
-    if (error.response && error.response.status >= 500) return MESSAGES.serverError
+    if (error.response && error.response.status >= 500) return COMMON_MESSAGES.serverError
   }
-  return MESSAGES.networkError
+  return COMMON_MESSAGES.networkError
 }
