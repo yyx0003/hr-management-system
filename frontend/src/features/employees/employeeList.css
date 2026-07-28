@@ -10,7 +10,7 @@
 
 .employee-search-form,
 .employee-result-section {
-  padding: 20px 24px;
+  padding: 16px 24px;
   border: 1px solid #dbe5f0;
   border-radius: 10px;
   background: #fff;
@@ -23,7 +23,7 @@
 }
 
 .employee-card-title {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   color: #172554;
   font-size: 18px;
 }
@@ -85,7 +85,7 @@
 .employee-list-actions {
   display: flex;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .employee-form-actions {
@@ -155,6 +155,22 @@
   margin-top: 16px;
 }
 
+.employee-result-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.employee-result-heading .employee-card-title {
+  margin: 0;
+}
+
+.employee-result-count {
+  color: #475569;
+  font-size: 14px;
+}
+
 .employee-table-wrapper {
   overflow-x: auto;
   margin-top: 12px;
@@ -198,7 +214,16 @@
 
 .employee-table tbody tr.employee-row-selected td {
   background: #e0f2fe;
+  color: #0f3b62;
+  font-weight: 600;
+}
+
+.employee-table tbody tr.employee-row-selected td:first-child {
   box-shadow: inset 4px 0 0 #0284c7;
+}
+
+.employee-table tbody tr.employee-row:not(.employee-row-selected):hover td {
+  background: #f8fbff;
 }
 
 .employee-table tbody tr:focus-within {
@@ -219,7 +244,7 @@
 @media (max-width: 720px) {
   .employee-search-form,
   .employee-result-section {
-    padding: 18px;
+    padding: 16px;
   }
 
   .employee-search-fields {

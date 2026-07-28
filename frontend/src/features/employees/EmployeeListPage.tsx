@@ -194,7 +194,10 @@ export function EmployeeListPage() {
       </form>
 
       <section className="employee-result-section" aria-labelledby="employee-result-title">
-        <h3 id="employee-result-title" className="employee-card-title">検索結果</h3>
+        <div className="employee-result-heading">
+          <h3 id="employee-result-title" className="employee-card-title">検索結果</h3>
+          {hasSearched && !isSearching && <span className="employee-result-count">（{employees.length}件）</span>}
+        </div>
         {searchError && <p className="employee-api-message" role="alert">{searchError}</p>}
         <div className="employee-table-wrapper">
           <table className="employee-table">
@@ -220,7 +223,7 @@ export function EmployeeListPage() {
                 employees.map((employee) => (
                   <tr
                     key={employee.employeeId}
-                    className={selectedEmployeeNo === employee.employeeNo ? 'employee-row-selected' : undefined}
+                    className={`employee-row${selectedEmployeeNo === employee.employeeNo ? ' employee-row-selected' : ''}`}
                   >
                     <td className="employee-select-cell">
                       <input
