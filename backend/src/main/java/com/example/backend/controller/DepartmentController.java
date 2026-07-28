@@ -34,6 +34,16 @@ public class DepartmentController {
         return ResponseEntity.ok(departmentService.findAll());
     }
 
+    /** 対象日での有効部署取得 */
+    @GetMapping("/{targetDate}")
+    public ResponseEntity<List<Department>> findAllEffectiveAt(
+        @PathVariable
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate targetDate
+    ) {
+        return ResponseEntity.ok(departmentService.findAllEffectiveAt(targetDate));
+    }
+
     /** 部署履歴更新 */
     @PutMapping
     public ResponseEntity<Department> updateDepartment(

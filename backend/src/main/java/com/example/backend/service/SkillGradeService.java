@@ -43,6 +43,12 @@ public class SkillGradeService {
                 }
         }
 
+        /** 対象日時点で有効な職能資格を取得 */
+        @Transactional
+        public List<SkillGrade> findAllEffectiveAt(LocalDate targetDate) {
+                return skillGradeRepository.findAllEffectiveAt(targetDate);           
+        }
+
         /** 職能資格履歴更新 */
         @Transactional
         public SkillGrade updateSkillGrade(
