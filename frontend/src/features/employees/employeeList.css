@@ -215,7 +215,7 @@
 .employee-table tbody tr.employee-row-selected td {
   background: #e0f2fe;
   color: #0f3b62;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .employee-table tbody tr.employee-row-selected td:first-child {
@@ -226,13 +226,13 @@
   background: #f8fbff;
 }
 
-.employee-table tbody tr:focus-within {
+.employee-table tbody tr:has(:focus-visible) {
   outline: 2px solid #2563eb;
   outline-offset: -2px;
 }
 
 .employee-table input[type='radio']:focus-visible {
-  outline: 3px solid #2563eb;
+  outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
 
