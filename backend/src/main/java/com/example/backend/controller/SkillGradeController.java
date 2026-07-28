@@ -34,6 +34,16 @@ public class SkillGradeController {
                 skillGradeService.findAll());
     }
 
+    @GetMapping("/{targetDate}")
+    public ResponseEntity<List<SkillGrade>> findAllEffectiveAt(
+        @PathVariable
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate targetDate) {
+        return ResponseEntity.ok(
+                skillGradeService.findAllEffectiveAt(targetDate)
+        );
+    }
+
     /** 職能資格履歴更新 */
     @PutMapping
     public ResponseEntity<SkillGrade> updateSkillGrade(

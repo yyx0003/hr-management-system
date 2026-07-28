@@ -34,6 +34,17 @@ public class QualificationController {
         return ResponseEntity.ok(qualificationService.findAll());
     }
 
+    /** 対象日での有効な資格を取得 */
+    @GetMapping("/{targetDate}")
+    public ResponseEntity<List<Qualification>> findAllEffectiveAt(
+        @PathVariable
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate targetDate) {
+        return ResponseEntity.ok(qualificationService
+                .findAllEffectiveAt(targetDate)
+        );
+    }
+
     /** 資格履歴更新 */
     @PutMapping
     public ResponseEntity<Qualification> updateQualification(

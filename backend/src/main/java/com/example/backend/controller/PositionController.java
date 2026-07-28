@@ -35,6 +35,17 @@ public class PositionController {
                                 positionService.findAll());
         }
 
+        /** 対象日での有効役職取得 */
+        @GetMapping("/{targetDate}")
+        public ResponseEntity<List<Position>> findAllEffectiveAt(
+                @PathVariable
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                LocalDate targetDate) {
+
+                return ResponseEntity
+                .ok(positionService.findAllEffectiveAt(targetDate));
+        } 
+
         /** 役職履歴更新 */
         @PutMapping
         public ResponseEntity<Position> updatePosition(
