@@ -1,10 +1,6 @@
 package com.example.backend.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalDate;
-import java.util.List;
-
+import com.example.backend.entity.Qualification;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +9,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.backend.entity.Qualification;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = {
         "jwt.secret=QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0MTIzNDU2Nzg5MDEyMzQ=",
@@ -28,183 +27,324 @@ class QualificationRepositoryTest {
     private QualificationRepository qualificationRepository;
 
     @Test
-    @DisplayName("指定日時点で有効な資格を取得できる")
+    @DisplayName("レコードが1件だけの場合（開始日当日）")
     void findEffectiveAtTest1() {
 
-        LocalDate targetDate = LocalDate.of(2026, 5, 31);
-
-        Qualification result = qualificationRepository.findEffectiveAt(
-                1L,
-                targetDate);
+        Qualification result =
+                qualificationRepository.findEffectiveAt(
+                        1L,
+                        LocalDate.of(2026, 4, 1));
 
         assertThat(result).isNotNull();
-        assertThat(result.getQualificationId())
-                .isEqualTo(1L);
         assertThat(result.getQualificationName())
-                .isEqualTo("基本情報技術者試験");
-        assertThat(result.getQualificationAllowance())
-                .isEqualTo(3000L);
+                .isEqualTo("基本情報技術者");
     }
 
     @Test
-    @DisplayName("開始日前は取得できない")
+    @DisplayName("レコードが1件だけの場合（開始日翌日）")
     void findEffectiveAtTest2() {
 
-        LocalDate targetDate = LocalDate.of(2026, 3, 31);
+        Qualification result =
+                qualificationRepository.findEffectiveAt(
+                        1L,
+                        LocalDate.of(2026, 4, 2));
 
-        Qualification result = qualificationRepository.findEffectiveAt(
-                1L,
-                targetDate);
-
-        assertThat(result).isNull();
+        assertThat(result).isNotNull();
+        assertThat(result.getQualificationName())
+                .isEqualTo("基本情報技術者");
     }
 
     @Test
-    @DisplayName("履歴切替前は切替前の資格情報を取得する")
+    @DisplayName("開始日前日は取得できない")
     void findEffectiveAtTest3() {
 
-        LocalDate targetDate = LocalDate.of(2026, 6, 30);
-
-        Qualification result = qualificationRepository.findEffectiveAt(
-                2L,
-                targetDate);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getQualificationAllowance())
-                .isEqualTo(5000L);
-    }
-
-    @Test
-    @DisplayName("履歴切替後は切替後の資格情報を取得する")
-    void findEffectiveAtTest4() {
-
-        LocalDate targetDate = LocalDate.of(2026, 7, 1);
-
-        Qualification result = qualificationRepository.findEffectiveAt(
-                2L,
-                targetDate);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getQualificationAllowance())
-                .isEqualTo(6000L);
-    }
-
-    @Test
-    @DisplayName("3履歴ある資格の中間履歴を取得できる")
-    void findEffectiveAtTest5() {
-
-        LocalDate targetDate = LocalDate.of(2026, 6, 30);
-
-        Qualification result = qualificationRepository.findEffectiveAt(
-                4L,
-                targetDate);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getQualificationAllowance())
-                .isEqualTo(35000L);
-    }
-
-    @Test
-    @DisplayName("3履歴ある資格の最新履歴を取得できる")
-    void findEffectiveAtTest6() {
-
-        LocalDate targetDate = LocalDate.of(2026, 7, 1);
-
-        Qualification result = qualificationRepository.findEffectiveAt(
-                4L,
-                targetDate);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getQualificationAllowance())
-                .isEqualTo(40000L);
-    }
-
-    @Test
-    @DisplayName("存在しない資格IDの場合はnull")
-    void findEffectiveAtTest7() {
-
-        Qualification result = qualificationRepository.findEffectiveAt(
-                999L,
-                LocalDate.of(2026, 7, 1));
+        Qualification result =
+                qualificationRepository.findEffectiveAt(
+                        1L,
+                        LocalDate.of(2026, 3, 31));
 
         assertThat(result).isNull();
     }
 
     @Test
-    @DisplayName("高度資格フラグを取得できる")
+    @DisplayName("1つ目の終了日当日")
+    void findEffectiveAtTest4() {
+
+        Qualification result =
+                qualificationRepository.findEffectiveAt(
+                        2L,
+                        LocalDate.of(2026, 4, 30));
+
+        assertThat(result.getQualificationName())
+                .isEqualTo("応用情報技術者");
+    }
+
+    @Test
+    @DisplayName("2つ目の開始日当日")
+    void findEffectiveAtTest5() {
+
+        Qualification result =
+                qualificationRepository.findEffectiveAt(
+                        2L,
+                        LocalDate.of(2026, 5, 1));
+
+        assertThat(result.getQualificationName())
+                .isEqualTo("応用情報技術者");
+    }
+
+    @Test
+    @DisplayName("2つ目の終了日当日")
+    void findEffectiveAtTest6() {
+
+        Qualification result =
+                qualificationRepository.findEffectiveAt(
+                        2L,
+                        LocalDate.of(2026, 5, 31));
+
+        assertThat(result.getQualificationName())
+                .isEqualTo("応用情報技術者");
+    }
+
+    @Test
+    @DisplayName("3つ目の開始日当日")
+    void findEffectiveAtTest7() {
+
+        Qualification result =
+                qualificationRepository.findEffectiveAt(
+                        2L,
+                        LocalDate.of(2026, 6, 1));
+
+        assertThat(result.getQualificationAllowance())
+                .isEqualTo(15000L);
+    }
+
+    @Test
+    @DisplayName("終了日当日は取得できる")
     void findEffectiveAtTest8() {
 
-        Qualification result = qualificationRepository.findEffectiveAt(
-                3L,
-                LocalDate.of(2026, 7, 1));
+        Qualification result =
+                qualificationRepository.findEffectiveAt(
+                        3L,
+                        LocalDate.of(2026, 6, 30));
 
-        assertThat(result).isNotNull();
-        assertThat(result.getIsAdvance()).isTrue();
+        assertThat(result.getQualificationAllowance())
+                .isEqualTo(30000L);
     }
 
     @Test
-    @DisplayName("対象日時点で有効な資格一覧を取得できる")
+    @DisplayName("終了日翌日は取得できない")
+    void findEffectiveAtTest9() {
+
+        Qualification result =
+                qualificationRepository.findEffectiveAt(
+                        3L,
+                        LocalDate.of(2026, 7, 1));
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    @DisplayName("どのレコードよりも過去の日付")
     void findAllEffectiveAtTest1() {
 
-        List<Qualification> qualifications = qualificationRepository.findAllEffectiveAt(
-                LocalDate.of(2026, 7, 1));
+        List<Qualification> result =
+                qualificationRepository.findAllEffectiveAt(
+                        LocalDate.of(2026, 3, 31));
 
-        assertThat(qualifications)
-                .hasSize(7);
-
-        assertThat(qualifications)
-                .extracting(Qualification::getQualificationName)
-                .containsExactlyInAnyOrder(
-                        "基本情報技術者試験",
-                        "応用情報技術者",
-                        "システムアーキテクト",
-                        "プロジェクトマネージャ",
-                        "ネットワークスペシャリスト",
-                        "データベーススペシャリスト",
-                        "エンベデッドシステムスペシャリスト");
-        
-        assertThat(qualifications)
-                .extracting(Qualification::getQualificationAllowance)
-                .containsExactlyInAnyOrder(
-                        3000L,
-                        6000L,
-                        30000L,
-                        35000L,
-                        40000L,
-                        30000L,
-                        30000L);
+        assertThat(result).isEmpty();
     }
 
     @Test
-    @DisplayName("対象日前日で有効な資格一覧を取得できる")
+    @DisplayName("変更日の前日")
     void findAllEffectiveAtTest2() {
 
-        List<Qualification> qualifications = qualificationRepository.findAllEffectiveAt(
-                LocalDate.of(2026, 6, 30));
+        List<Qualification> result =
+                qualificationRepository.findAllEffectiveAt(
+                        LocalDate.of(2026, 4, 30));
 
-        assertThat(qualifications)
-                .hasSize(7);
+        assertThat(result).hasSize(3);
+    }
 
-        assertThat(qualifications)
-                .extracting(Qualification::getQualificationName)
-                .containsExactlyInAnyOrder(
-                        "基本情報技術者試験",
-                        "応用情報技術者",
-                        "システムアーキテクト",
-                        "プロジェクトマネージャ",
-                        "ネットワークスペシャリスト",
-                        "データベーススペシャリスト",
-                        "エンベデッドシステムスペシャリスト");
+    @Test
+    @DisplayName("変更日の当日")
+    void findAllEffectiveAtTest3() {
 
-        assertThat(qualifications)
-                .extracting(Qualification::getQualificationAllowance)
-                .containsExactlyInAnyOrder(
-                        3000L,
-                        5000L,
-                        30000L,
-                        35000L,
-                        35000L,
-                        30000L,
-                        30000L);
+        List<Qualification> result =
+                qualificationRepository.findAllEffectiveAt(
+                        LocalDate.of(2026, 5, 1));
+
+        assertThat(result).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("最新履歴を取得できる（履歴1件）")
+    void findLatestByQualificationIdTest1() {
+
+        Qualification result =
+                qualificationRepository
+                        .findLatestByQualificationId(1L);
+
+        assertThat(result.getQualificationName())
+                .isEqualTo("基本情報技術者");
+    }
+
+    @Test
+    @DisplayName("最新履歴を取得できる（履歴複数）")
+    void findLatestByQualificationIdTest2() {
+
+        Qualification result =
+                qualificationRepository
+                        .findLatestByQualificationId(2L);
+
+        assertThat(result.getQualificationAllowance())
+                .isEqualTo(15000L);
+    }
+
+    @Test
+    @DisplayName("最新履歴を取得できる（全履歴終了済み）")
+    void findLatestByQualificationIdTest3() {
+
+        Qualification result =
+                qualificationRepository
+                        .findLatestByQualificationId(3L);
+
+        assertThat(result.getQualificationAllowance())
+                .isEqualTo(30000L);
+    }
+
+    @Test
+    @DisplayName("存在しないIDの場合はnull")
+    void findLatestByQualificationIdTest4() {
+
+        Qualification result =
+                qualificationRepository
+                        .findLatestByQualificationId(999L);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    @DisplayName("終了日更新（履歴1件）")
+    void updateEndDateTest1() {
+
+        Qualification qualification =
+                qualificationRepository
+                        .findLatestByQualificationId(1L);
+
+        qualification.setEndDate(
+                LocalDate.of(2026, 12, 31));
+
+        assertThat(
+                qualificationRepository.updateEndDate(
+                        qualification))
+                .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("終了日更新（履歴複数）")
+    void updateEndDateTest2() {
+
+        Qualification qualification =
+                qualificationRepository
+                        .findLatestByQualificationId(2L);
+
+        qualification.setEndDate(
+                LocalDate.of(2026, 12, 31));
+
+        assertThat(
+                qualificationRepository.updateEndDate(
+                        qualification))
+                .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("存在しないレコードの更新は0件")
+    void updateEndDateTest3() {
+
+        Qualification qualification =
+                new Qualification();
+
+        qualification.setQualificationId(999L);
+        qualification.setStartDate(
+                LocalDate.of(2026, 1, 1));
+        qualification.setEndDate(
+                LocalDate.of(2026, 12, 31));
+
+        assertThat(
+                qualificationRepository.updateEndDate(
+                        qualification))
+                .isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("資格IDの最大値を取得できる")
+    void findMaxIdTest1() {
+
+        assertThat(
+                qualificationRepository.findMaxId())
+                .isEqualTo(3L);
+    }
+
+    @Test
+    @DisplayName("資格履歴削除（履歴1件）")
+    void deleteQualificationTest1() {
+
+        Qualification qualification =
+                qualificationRepository
+                        .findLatestByQualificationId(1L);
+
+        assertThat(
+                qualificationRepository
+                        .deleteQualification(
+                                qualification))
+                .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("資格履歴削除（履歴複数の最新レコード）")
+    void deleteQualificationTest2() {
+
+        Qualification qualification =
+                qualificationRepository
+                        .findLatestByQualificationId(2L);
+
+        assertThat(
+                qualificationRepository
+                        .deleteQualification(
+                                qualification))
+                .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("資格履歴削除（全履歴終了済みの最新レコード）")
+    void deleteQualificationTest3() {
+
+        Qualification qualification =
+                qualificationRepository
+                        .findLatestByQualificationId(3L);
+
+        assertThat(
+                qualificationRepository
+                        .deleteQualification(
+                                qualification))
+                .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("存在しない資格の削除は0件")
+    void deleteQualificationTest4() {
+
+        Qualification qualification =
+                new Qualification();
+
+        qualification.setQualificationId(999L);
+        qualification.setStartDate(
+                LocalDate.of(2026, 1, 1));
+
+        assertThat(
+                qualificationRepository
+                        .deleteQualification(
+                                qualification))
+                .isEqualTo(0);
     }
 }

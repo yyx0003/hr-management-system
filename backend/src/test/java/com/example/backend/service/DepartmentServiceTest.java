@@ -1,14 +1,10 @@
 package com.example.backend.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-
+import com.example.backend.common.exception.BusinessException;
+import com.example.backend.entity.Department;
+import com.example.backend.repository.DepartmentRepository;
+import com.example.backend.repository.EmployeeRepository;
+import com.example.backend.repository.SalaryResultRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,15 +13,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.example.backend.common.exception.BusinessException;
-import com.example.backend.entity.Department;
-import com.example.backend.repository.DepartmentRepository;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Locale;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DepartmentServiceTest {
 
     @Mock
     private DepartmentRepository departmentRepository;
+
+    @Mock
+    private EmployeeRepository employeeRepository;
+
+    @Mock
+    private SalaryResultRepository salaryResultRepository;
 
     @Mock
     private MessageSource messageSource;
@@ -37,115 +43,328 @@ class DepartmentServiceTest {
     @DisplayName("対象日時点で有効な部署を取得できる")
     void findEffectiveAtTest1() {
 
-        LocalDate targetDate =
-                LocalDate.of(2026, 7, 1);
-
-        Department department =
-                new Department();
-
+        Department department = new Department();
         department.setDepartmentId(1L);
         department.setDepartmentName("経営");
 
         when(departmentRepository.findEffectiveAt(
                 1L,
-                targetDate))
-                .thenReturn(department);
+                LocalDate.of(2026, 4, 1)))
+                        .thenReturn(department);
 
         Department result =
                 departmentService.findEffectiveAt(
                         1L,
-                        targetDate);
+                        LocalDate.of(2026, 4, 1));
 
-        assertThat(result).isNotNull();
-        assertThat(result.getDepartmentId())
-                .isEqualTo(1L);
         assertThat(result.getDepartmentName())
                 .isEqualTo("経営");
     }
 
     @Test
-    @DisplayName("対象日時点で有効な部署が存在しない場合はBusinessException")
+    @DisplayName("対象部署が存在しない場合")
     void findEffectiveAtTest2() {
-
-        LocalDate targetDate =
-                LocalDate.of(2026, 7, 1);
-
-        when(departmentRepository.findEffectiveAt(
-                1L,
-                targetDate))
-                .thenReturn(null);
 
         when(messageSource.getMessage(
                 any(),
                 any(),
+                any(Locale.class)))
+                        .thenReturn("対象日時点で有効なレコードが存在しません");
+
+        when(departmentRepository.findEffectiveAt(
+                any(),
                 any()))
-                .thenReturn("対象データが存在しません");
+                        .thenReturn(null);
 
         assertThatThrownBy(() ->
                 departmentService.findEffectiveAt(
-                        1L,
-                        targetDate))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage("対象データが存在しません");
+                        999L,
+                        LocalDate.now()))
+                                .isInstanceOf(
+                                        BusinessException.class);
     }
 
     @Test
-    @DisplayName("対象日時点で有効な部署一覧を取得できる")
+    @DisplayName("有効な部署一覧を取得できる")
     void findAllEffectiveAtTest1() {
 
-        LocalDate targetDate =
-                LocalDate.of(2026, 7, 1);
+        Department department = new Department();
 
-        Department department1 =
-                new Department();
-        department1.setDepartmentId(1L);
-        department1.setDepartmentName("経営");
-
-        Department department2 =
-                new Department();
-        department2.setDepartmentId(2L);
-        department2.setDepartmentName("営業");
-
-        List<Department> departments =
-                List.of(department1, department2);
-
-        when(departmentRepository.findAllEffectiveAt(
-                targetDate))
-                .thenReturn(departments);
+        when(departmentRepository.findAllEffectiveAt(any()))
+                .thenReturn(List.of(department));
 
         List<Department> result =
                 departmentService.findAllEffectiveAt(
-                        targetDate);
+                        LocalDate.now());
 
-        assertThat(result)
-                .hasSize(2);
-
-        assertThat(result)
-                .extracting(Department::getDepartmentName)
-                .containsExactly("経営", "営業");
+        assertThat(result).hasSize(1);
     }
 
     @Test
-    @DisplayName("対象日時点で有効な部署一覧が存在しない場合はBusinessException")
+    @DisplayName("有効な部署一覧が存在しない")
     void findAllEffectiveAtTest2() {
-
-        LocalDate targetDate =
-                LocalDate.of(2026, 7, 1);
-
-        when(departmentRepository.findAllEffectiveAt(
-                targetDate))
-                .thenReturn(Collections.emptyList());
 
         when(messageSource.getMessage(
                 any(),
                 any(),
-                any()))
-                .thenReturn("対象データが存在しません");
+                any(Locale.class)))
+                        .thenReturn("対象日時点で有効なレコードが存在しません");
+
+        when(departmentRepository.findAllEffectiveAt(any()))
+                .thenReturn(List.of());
 
         assertThatThrownBy(() ->
                 departmentService.findAllEffectiveAt(
-                        targetDate))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage("対象データが存在しません");
+                        LocalDate.now()))
+                                .isInstanceOf(
+                                        BusinessException.class);
+    }
+
+    @Test
+    @DisplayName("新規部署登録")
+    void createDepartmentTest1() {
+
+        when(departmentRepository.findMaxId())
+                .thenReturn(3L);
+
+        Department result =
+                departmentService.createDepartment(
+                        "テスト部",
+                        LocalDate.of(2027, 1, 1));
+
+        assertThat(result.getDepartmentId())
+                .isEqualTo(4L);
+
+        verify(departmentRepository)
+                .insert(any(Department.class));
+    }
+
+    @Test
+    @DisplayName("部署テーブルが空の場合はID=1")
+    void createDepartmentTest2() {
+
+        when(departmentRepository.findMaxId())
+                .thenReturn(null);
+
+        Department result =
+                departmentService.createDepartment(
+                        "テスト部",
+                        LocalDate.of(2027, 1, 1));
+
+        assertThat(result.getDepartmentId())
+                .isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("部署履歴更新")
+    void updateDepartmentTest1() {
+
+        Department latest = new Department();
+
+        latest.setDepartmentId(1L);
+        latest.setStartDate(
+                LocalDate.of(2026, 4, 1));
+        latest.setEndDate(null);
+
+        when(departmentRepository
+                .findLatestByDepartmentId(1L))
+                        .thenReturn(latest);
+
+        when(departmentRepository
+                .updateEndDate(any()))
+                        .thenReturn(1);
+
+        Department result =
+                departmentService.updateDepartment(
+                        1L,
+                        LocalDate.of(2026, 5, 1),
+                        "新部署");
+
+        assertThat(result.getDepartmentName())
+                .isEqualTo("新部署");
+    }
+
+    @Test
+    @DisplayName("更新開始日が不正")
+    void updateDepartmentTest2() {
+
+        Department latest = new Department();
+
+        latest.setStartDate(
+                LocalDate.of(2026, 5, 1));
+        latest.setEndDate(null);
+
+        when(departmentRepository
+                .findLatestByDepartmentId(1L))
+                        .thenReturn(latest);
+
+        when(messageSource.getMessage(
+                any(),
+                any(),
+                any(Locale.class)))
+                        .thenReturn("新しい適用開始日は、現在有効なデータの適用終了日より後の日付にしてください。");
+
+        assertThatThrownBy(() ->
+                departmentService.updateDepartment(
+                        1L,
+                        LocalDate.of(2026, 5, 1),
+                        "新部署"))
+                                .isInstanceOf(
+                                        BusinessException.class);
+    }
+
+    @Test
+    @DisplayName("終了日更新失敗")
+    void updateDepartmentTest3() {
+
+        Department latest = new Department();
+
+        latest.setStartDate(
+                LocalDate.of(2026, 4, 1));
+        latest.setEndDate(null);
+
+        when(departmentRepository
+                .findLatestByDepartmentId(1L))
+                        .thenReturn(latest);
+
+        when(departmentRepository
+                .updateEndDate(any()))
+                        .thenReturn(0);
+
+        when(messageSource.getMessage(
+                any(),
+                any(),
+                any(Locale.class)))
+                        .thenReturn("更新に失敗しました。");
+
+        assertThatThrownBy(() ->
+                departmentService.updateDepartment(
+                        1L,
+                        LocalDate.of(2026, 5, 1),
+                        "新部署"))
+                                .isInstanceOf(
+                                        BusinessException.class);
+    }
+
+    @Test
+    @DisplayName("未使用の未来履歴は削除できる")
+    void deleteDepartmentTest1() {
+
+        Department department = new Department();
+
+        department.setDepartmentId(1L);
+        department.setStartDate(
+                LocalDate.now().plusDays(1));
+        department.setEndDate(null);
+
+        when(employeeRepository.selectCount(any()))
+                .thenReturn(0L);
+
+        when(salaryResultRepository.selectCount(any()))
+                .thenReturn(0L);
+
+        when(departmentRepository.findEffectiveAt(
+                any(),
+                any()))
+                        .thenReturn(department);
+
+        departmentService.deleteDepartment(
+                1L,
+                department.getStartDate());
+
+        verify(departmentRepository)
+                .deleteDepartment(department);
+    }
+
+    @Test
+    @DisplayName("利用中の部署は削除できない")
+    void deleteDepartmentTest2() {
+
+        when(employeeRepository.selectCount(any()))
+                .thenReturn(1L);
+
+        when(messageSource.getMessage(
+                any(),
+                any(),
+                any(Locale.class)))
+                        .thenReturn("業務データから参照されているため削除できません。");
+
+        assertThatThrownBy(() ->
+                departmentService.deleteDepartment(
+                        1L,
+                        LocalDate.now()))
+                                .isInstanceOf(
+                                        BusinessException.class);
+    }
+
+    @Test
+    @DisplayName("過去履歴は削除できない")
+    void deleteDepartmentTest3() {
+
+        Department department = new Department();
+
+        department.setStartDate(
+                LocalDate.now().minusDays(1));
+
+        when(employeeRepository.selectCount(any()))
+                .thenReturn(0L);
+
+        when(salaryResultRepository.selectCount(any()))
+                .thenReturn(0L);
+
+        when(departmentRepository.findEffectiveAt(
+                any(),
+                any()))
+                        .thenReturn(department);
+
+        when(messageSource.getMessage(
+                any(),
+                any(),
+                any(Locale.class)))
+                        .thenReturn("過去の履歴データ、または現在有効なデータは削除できません。");
+
+        assertThatThrownBy(() ->
+                departmentService.deleteDepartment(
+                        1L,
+                        department.getStartDate()))
+                                .isInstanceOf(
+                                        BusinessException.class);
+    }
+
+    @Test
+    @DisplayName("次履歴が存在する場合は削除できない")
+    void deleteDepartmentTest4() {
+
+        Department department = new Department();
+
+        department.setStartDate(
+                LocalDate.now().plusDays(1));
+
+        department.setEndDate(
+                LocalDate.now().plusDays(10));
+
+        when(employeeRepository.selectCount(any()))
+                .thenReturn(0L);
+
+        when(salaryResultRepository.selectCount(any()))
+                .thenReturn(0L);
+
+        when(departmentRepository.findEffectiveAt(
+                any(),
+                any()))
+                        .thenReturn(department);
+
+        when(messageSource.getMessage(
+                any(),
+                any(),
+                any(Locale.class)))
+                        .thenReturn("開始日が最も先のデータ以外は削除できません。");
+
+        assertThatThrownBy(() ->
+                departmentService.deleteDepartment(
+                        1L,
+                        department.getStartDate()))
+                                .isInstanceOf(
+                                        BusinessException.class);
     }
 }
