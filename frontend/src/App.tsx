@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage'
 import { MainLayout } from './layouts/MainLayout'
 import { ROUTES } from './constants/routes'
 import { getAccessToken } from './features/auth/authStorage'
+import { EmployeeListPage } from './features/employees/EmployeeListPage'
 import './App.css'
 
 function RootRedirect() {
@@ -21,7 +22,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path={ROUTES.menu} element={<MenuPage />} />
-            <Route path={ROUTES.employees} element={<PlaceholderPage title="社員管理" />} />
+            <Route path={ROUTES.employees} element={<EmployeeListPage />} />
             <Route path={ROUTES.employeeNew} element={<PlaceholderPage title="社員登録" />} />
             <Route path={ROUTES.employeeDetail} element={<PlaceholderPage title="社員詳細" />} />
             <Route path={ROUTES.employeeEdit} element={<PlaceholderPage title="社員編集" />} />

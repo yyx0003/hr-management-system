@@ -20,7 +20,7 @@ export function SideMenu() {
 
   return (
     <aside className="side-menu">
-      <h1>人事管理システム</h1>
+      <h1>社員情報管理システム</h1>
       <nav aria-label="メインメニュー">
         {menuItems.map((item) => (
           <NavLink key={item.to} to={item.to}>

@@ -1,0 +1,237 @@
+.employee-list-page {
+  max-width: 1200px;
+}
+
+.employee-list-title {
+  margin: 0 0 24px;
+  color: #172554;
+  font-size: 28px;
+}
+
+.employee-search-form,
+.employee-result-section {
+  padding: 20px 24px;
+  border: 1px solid #dbe5f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.employee-search-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.employee-card-title {
+  margin: 0 0 16px;
+  color: #172554;
+  font-size: 18px;
+}
+
+.employee-search-field {
+  display: grid;
+  grid-template-rows: auto 42px 40px;
+  gap: 6px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.employee-field-messages {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-height: 0;
+}
+
+.employee-search-field input,
+.employee-search-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #aebdce;
+  border-radius: 6px;
+  color: #1e293b;
+  background: #fff;
+  font: inherit;
+  font-weight: 400;
+}
+
+.employee-search-field input:focus,
+.employee-search-field select:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 18%);
+}
+
+.employee-search-field input[aria-invalid='true'],
+.employee-search-field select[aria-invalid='true'] {
+  border-color: #dc2626;
+}
+
+.employee-search-field input[aria-invalid='true']:focus,
+.employee-search-field select[aria-invalid='true']:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgb(220 38 38 / 18%);
+}
+
+.employee-field-error {
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.employee-form-actions,
+.employee-list-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.employee-form-actions {
+  justify-content: flex-end;
+}
+
+.employee-primary-button,
+.employee-secondary-button {
+  min-height: 42px;
+  padding: 9px 18px;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.employee-primary-button {
+  border: 0;
+  color: #fff;
+  background: #2563eb;
+}
+
+.employee-primary-button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.employee-secondary-button {
+  border: 1px solid #64748b;
+  color: #334155;
+  background: #fff;
+}
+
+.employee-primary-button:disabled,
+.employee-secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.employee-api-message,
+.employee-empty-message,
+.employee-loading-message {
+  margin: 20px 0 0;
+  padding: 11px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.employee-api-message {
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+  background: #fff5f6;
+}
+
+.employee-empty-message {
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  background: #eff6ff;
+}
+
+.employee-loading-message {
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  background: #eff6ff;
+}
+
+.employee-result-section {
+  margin-top: 16px;
+}
+
+.employee-table-wrapper {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.employee-table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+}
+
+.employee-table th,
+.employee-table td {
+  padding: 12px;
+  border-bottom: 1px solid #dbe5f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.employee-table th {
+  color: #334155;
+  background: #f8fafc;
+  font-size: 14px;
+}
+
+.employee-table td {
+  color: #1e293b;
+}
+
+.employee-table-message {
+  height: 88px;
+  color: #475569 !important;
+  text-align: center !important;
+  white-space: normal !important;
+}
+
+.employee-table-message .employee-empty-message,
+.employee-table-message .employee-loading-message {
+  margin: 0;
+}
+
+.employee-table tbody tr.employee-row-selected td {
+  background: #e0f2fe;
+  box-shadow: inset 4px 0 0 #0284c7;
+}
+
+.employee-table tbody tr:focus-within {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+.employee-table input[type='radio']:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.employee-select-cell {
+  width: 52px;
+  text-align: center !important;
+}
+
+@media (max-width: 720px) {
+  .employee-search-form,
+  .employee-result-section {
+    padding: 18px;
+  }
+
+  .employee-search-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-form-actions,
+  .employee-list-actions {
+    flex-direction: column;
+  }
+
+  .employee-form-actions {
+    align-items: stretch;
+  }
+}
