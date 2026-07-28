@@ -32,7 +32,16 @@ public class SkillGradeService {
                 return skillGradeRepository.selectList(null);
         }
 
-        /**  */
+        /** 対象IDの日付時点での履歴を取得 */
+        @Transactional
+        public SkillGrade findEffectiveAt(Integer skillGrade, LocalDate targetDate) {
+                SkillGrade skillGradeEntity = skillGradeRepository.findEffectiveAt(skillGrade, targetDate);
+                if (skillGradeEntity == null) {
+                        throw MasterException("master.find.notfound");
+                } else {
+                        return skillGradeEntity;
+                }
+        }
 
         /** 職能資格履歴更新 */
         @Transactional
