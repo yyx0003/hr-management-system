@@ -6,6 +6,9 @@ import { LoginPage } from './pages/LoginPage'
 import { MainLayout } from './layouts/MainLayout'
 import { ROUTES } from './constants/routes'
 import { getAccessToken } from './features/auth/authStorage'
+import { AttendancePage } from './features/attendance/pages/AttendancePage'
+import { AttendanceImportPage } from './features/attendance/pages/AttendanceImportPage'
+import { CsvExportPage } from './features/attendance/pages/CsvExportPage'
 import './App.css'
 
 function RootRedirect() {
@@ -25,9 +28,9 @@ function App() {
             <Route path={ROUTES.employeeNew} element={<PlaceholderPage title="社員登録" />} />
             <Route path={ROUTES.employeeDetail} element={<PlaceholderPage title="社員詳細" />} />
             <Route path={ROUTES.employeeEdit} element={<PlaceholderPage title="社員編集" />} />
-            <Route path={ROUTES.attendances} element={<PlaceholderPage title="勤怠管理" />} />
-            <Route path={ROUTES.attendanceImport} element={<PlaceholderPage title="勤怠インポート" />} />
-            <Route path={ROUTES.csvExport} element={<PlaceholderPage title="CSV出力" />} />
+            <Route path={ROUTES.attendances} element={<AttendancePage />}/>
+            <Route path={ROUTES.attendanceImport} element={<AttendanceImportPage />}/>
+            <Route path={ROUTES.csvExport} element={<CsvExportPage />}/>
             <Route path={ROUTES.department} element={<PlaceholderPage title="部門マスタ" />} />
             <Route path={ROUTES.position} element={<PlaceholderPage title="役職マスタ" />} />
             <Route path={ROUTES.qualification} element={<PlaceholderPage title="資格マスタ" />} />
