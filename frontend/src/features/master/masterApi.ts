@@ -27,7 +27,7 @@ export const departmentApi = {
      * @returns 過去分を含めた全部署
      */
     findAll: async (): Promise<Department[]> => {
-        const response = await fetch(`${API_BASE_URL}/api/department`, {
+        const response = await fetch(`${API_BASE_URL}/department`, {
             method: 'GET',
         })
         await handleError(response, MASTER_MESSAGES.dataFetchFailed);
@@ -40,7 +40,7 @@ export const departmentApi = {
      * @returns targetDate時点での有効な部署リスト
      */
     findAllEffectiveAt: async (targetDate: string): Promise<Department[]> => {
-        const response = await fetch(`${API_BASE_URL}/api/department/${targetDate}`, {
+        const response = await fetch(`${API_BASE_URL}/department/${targetDate}`, {
             method: 'GET',
         })
 
@@ -49,7 +49,7 @@ export const departmentApi = {
     },
 
     createDepartment: async (department: CreateDepartmentRequest): Promise<Department> => {
-        const response = await fetch(`${API_BASE_URL}/api/department`, {
+        const response = await fetch(`${API_BASE_URL}/department`, {
             headers: getHeaders(),
             method: 'POST',
             body: JSON.stringify(department),
@@ -59,7 +59,7 @@ export const departmentApi = {
     },
 
     updateDepartment: async (department: UpdateDepartmentRequest): Promise<Department> => {
-        const response = await fetch(`${API_BASE_URL}/api/department`, {
+        const response = await fetch(`${API_BASE_URL}/department`, {
             headers: getHeaders(),
             method: 'PUT',
             body: JSON.stringify(department),
@@ -70,7 +70,7 @@ export const departmentApi = {
 
     deleteDepartment: async (departmentId: number, startDate: string): Promise<void> => {
         const response = await fetch(
-            `${API_BASE_URL}/api/department/${departmentId}/${startDate}`, {
+            `${API_BASE_URL}/department/${departmentId}/${startDate}`, {
             headers: getHeaders(),
             method: 'DELETE',
         })
@@ -86,7 +86,7 @@ export const positionApi = {
     findAll: async (): Promise<Position[]> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/position`,
+            `${API_BASE_URL}/position`,
             {
                 method: 'GET',
             }
@@ -108,7 +108,7 @@ export const positionApi = {
     ): Promise<Position[]> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/position/${targetDate}`,
+            `${API_BASE_URL}/position/${targetDate}`,
             {
                 method: 'GET',
             }
@@ -130,7 +130,7 @@ export const positionApi = {
     ): Promise<Position> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/position`,
+            `${API_BASE_URL}/position`,
             {
                 method: 'POST',
                 headers: getHeaders(),
@@ -154,7 +154,7 @@ export const positionApi = {
     ): Promise<Position> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/position`,
+            `${API_BASE_URL}/position`,
             {
                 method: 'PUT',
                 headers: getHeaders(),
@@ -179,7 +179,7 @@ export const positionApi = {
     ): Promise<void> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/position/${positionId}/${startDate}`,
+            `${API_BASE_URL}/position/${positionId}/${startDate}`,
             {
                 method: 'DELETE',
                 headers: getHeaders(),
@@ -201,7 +201,7 @@ export const qualificationApi = {
     findAll: async (): Promise<Qualification[]> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/qualification`,
+            `${API_BASE_URL}/qualification`,
             {
                 method: 'GET',
             }
@@ -223,7 +223,7 @@ export const qualificationApi = {
     ): Promise<Qualification[]> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/qualification/${targetDate}`,
+            `${API_BASE_URL}/qualification/${targetDate}`,
             {
                 method: 'GET',
             }
@@ -245,7 +245,7 @@ export const qualificationApi = {
     ): Promise<Qualification> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/qualification`,
+            `${API_BASE_URL}/qualification`,
             {
                 method: 'POST',
                 headers: getHeaders(),
@@ -271,7 +271,7 @@ export const qualificationApi = {
     ): Promise<Qualification> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/qualification`,
+            `${API_BASE_URL}/qualification`,
             {
                 method: 'PUT',
                 headers: getHeaders(),
@@ -298,7 +298,7 @@ export const qualificationApi = {
     ): Promise<void> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/qualification/${qualificationId}/${startDate}`,
+            `${API_BASE_URL}/qualification/${qualificationId}/${startDate}`,
             {
                 method: 'DELETE',
                 headers: getHeaders(),
@@ -320,7 +320,7 @@ export const skillGradeApi = {
     findAll: async (): Promise<SkillGrade[]> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/skillgrade`,
+            `${API_BASE_URL}/skillgrade`,
             {
                 method: 'GET',
             }
@@ -342,7 +342,7 @@ export const skillGradeApi = {
     ): Promise<SkillGrade[]> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/skillgrade/${targetDate}`,
+            `${API_BASE_URL}/skillgrade/${targetDate}`,
             {
                 method: 'GET',
             }
@@ -364,7 +364,7 @@ export const skillGradeApi = {
     ): Promise<SkillGrade> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/skillgrade`,
+            `${API_BASE_URL}/skillgrade`,
             {
                 method: 'PUT',
                 headers: getHeaders(),
@@ -391,7 +391,7 @@ export const skillGradeApi = {
     ): Promise<void> => {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/skillgrade/${skillGrade}/${startDate}`,
+            `${API_BASE_URL}/skillgrade/${skillGrade}/${startDate}`,
             {
                 method: 'DELETE',
                 headers: getHeaders(),
