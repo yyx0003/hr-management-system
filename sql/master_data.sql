@@ -93,4 +93,46 @@ INSERT INTO qualification (
     (6, DATE '2026-04-01', 'データベーススペシャリスト',         TRUE,  30000, NULL),
     (7, DATE '2026-04-01', 'エンベデッドシステムスペシャリスト', TRUE,  30000, NULL);
 
+-- ---------------------------------------------------------------------
+-- 初期ログイン社員
+-- 部署・職能資格は有効な初期マスタを使用し、役職は未設定とする。
+-- password_hash はパスワード「0001」の BCrypt ハッシュである。
+-- ---------------------------------------------------------------------
+INSERT INTO employee (
+    start_date,
+    employee_no,
+    password_hash,
+    employee_name,
+    birth_date,
+    postal_code,
+    address,
+    phone_number,
+    email_address,
+    hire_date,
+    retire_date,
+    department_id,
+    skill_grade,
+    position_id,
+    end_date
+) VALUES (
+    DATE '2026-04-01',
+    '0001',
+    '$2a$10$DCVd3OAMoDq40RpGNRnYCO6TuhelMMaU.ovgc0Y44MyTBQJ./Lth2',
+    '初期ログイン社員',
+    DATE '2000-01-01',
+    '1000001',
+    '東京都千代田区',
+    NULL,
+    NULL,
+    DATE '2026-04-01',
+    NULL,
+    1,
+    1,
+    NULL,
+    NULL
+);
+
+-- 初期社員が0001を使用するため、次回の社員登録は0002から採番する。
+ALTER SEQUENCE employee_no_seq RESTART WITH 2;
+
 COMMIT;
