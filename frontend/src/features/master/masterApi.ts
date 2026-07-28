@@ -70,7 +70,7 @@ export const departmentApi = {
 
     deleteDepartment: async (departmentId: number, startDate: string): Promise<void> => {
         const response = await fetch(
-            `${API_BASE_URL}/api/department/${departmentId}/${startDate}`, {
+            `${API_BASE_URL}/department/${departmentId}/${startDate}`, {
             headers: getHeaders(),
             method: 'DELETE',
         })
