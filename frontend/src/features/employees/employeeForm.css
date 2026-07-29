@@ -61,6 +61,14 @@
   gap: 6px;
 }
 
+.employee-required-mark {
+  display: inline-block;
+  margin-left: 6px;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .employee-form-field input,
 .employee-form-field select {
   box-sizing: border-box;
@@ -137,6 +145,22 @@
   color: #166534;
   background: #f0fdf4;
   font-size: 14px;
+}
+
+.employee-create-guidance,
+.employee-form-guidance {
+  margin: 0 0 12px;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.employee-create-guidance {
+  padding: 11px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  color: #1e40af;
+  background: #eff6ff;
 }
 
 @media (max-width: 720px) {
