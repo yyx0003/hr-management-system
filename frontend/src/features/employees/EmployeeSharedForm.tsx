@@ -4,12 +4,16 @@ import { hasEmployeeFormErrors, validateEmployeeForm } from './employeeForm'
 import type { EmployeeFormValues } from './types'
 import './employeeForm.css'
 
+type FormSkillGrade = SkillGrade & {
+  displayLabel?: string
+}
+
 type EmployeeFormProps = {
   initialValues: EmployeeFormValues
   departments: Department[]
   positions: Position[]
   qualifications: Qualification[]
-  skillGrades: SkillGrade[]
+  skillGrades: FormSkillGrade[]
   requiresHireDate: boolean
   isSubmitting?: boolean
   isMasterSelectionDisabled?: boolean
@@ -133,7 +137,7 @@ export function EmployeeForm({
           <Field id="employee-skill-grade" label="職能資格" required error={errors.skillGrade}>
             <select disabled={isMasterSelectionDisabled} value={values.skillGrade} onChange={(event) => update('skillGrade', event.target.value)}>
               <option value="">選択してください</option>
-              {skillGrades.map((item) => <option key={item.skillGrade} value={item.skillGrade}>{item.skillGrade}級</option>)}
+              {skillGrades.map((item) => <option key={item.skillGrade} value={item.skillGrade}>{item.displayLabel ?? `${item.skillGrade}級`}</option>)}
             </select>
           </Field>
         </div>

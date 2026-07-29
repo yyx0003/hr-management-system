@@ -163,6 +163,38 @@
   background: #eff6ff;
 }
 
+.employee-readonly-info {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+}
+
+.employee-readonly-info dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin: 0;
+}
+
+.employee-readonly-info div {
+  display: grid;
+  gap: 3px;
+}
+
+.employee-readonly-info dt {
+  color: #1e40af;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.employee-readonly-info dd {
+  margin: 0;
+  color: #172554;
+  font-weight: 600;
+}
+
 @media (max-width: 720px) {
   .employee-detail-card,
   .employee-form-card {

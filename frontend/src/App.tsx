@@ -9,6 +9,7 @@ import { getAccessToken } from './features/auth/authStorage'
 import { EmployeeListPage } from './features/employees/EmployeeListPage'
 import { EmployeeDetailPage } from './features/employees/EmployeeDetailPage'
 import { EmployeeCreatePage } from './features/employees/EmployeeCreatePage'
+import { EmployeeEditPage } from './features/employees/EmployeeEditPage'
 import './App.css'
 
 function RootRedirect() {
@@ -27,7 +28,7 @@ function App() {
             <Route path={ROUTES.employees} element={<EmployeeListPage />} />
             <Route path={ROUTES.employeeNew} element={<EmployeeCreatePage />} />
             <Route path={ROUTES.employeeDetail} element={<EmployeeDetailPage />} />
-            <Route path={ROUTES.employeeEdit} element={<PlaceholderPage title="社員編集" />} />
+            <Route path={ROUTES.employeeEdit} element={<EmployeeEditPage />} />
             <Route path={ROUTES.attendances} element={<PlaceholderPage title="勤怠管理" />} />
             <Route path={ROUTES.attendanceImport} element={<PlaceholderPage title="勤怠インポート" />} />
             <Route path={ROUTES.csvExport} element={<PlaceholderPage title="CSV出力" />} />
