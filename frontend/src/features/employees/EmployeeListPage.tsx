@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import { COMMON_MESSAGES } from '../../messages/commonMessages'
 import { fetchActiveDepartments, searchEmployees } from './employeeApi'
+import { triggerRetireeDelete } from '../../api/batch'
 import './employeeList.css'
 import { EMPLOYEE_MESSAGES } from './messages'
 import type { ApiErrorResponse, DepartmentOption, EmployeeListItem, EmployeeSearchCondition } from './types'
@@ -29,6 +30,8 @@ export function EmployeeListPage() {
   const [departmentLoadError, setDepartmentLoadError] = useState('')
   const [searchError, setSearchError] = useState('')
   const [selectionError, setSelectionError] = useState('')
+  const [isRetiring, setIsRetiring] = useState(false)
+const [retireResult, setRetireResult] = useState('')
   const searchAbortControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
@@ -105,6 +108,18 @@ export function EmployeeListPage() {
 
     navigate(ROUTES.employeeEdit.replace(':employeeNo', encodeURIComponent(selectedEmployeeNo)))
   }
+  const handleRetireeDeleteTest = async () => {
+  setIsRetiring(true)
+  setRetireResult('')
+  try {
+    const result = await triggerRetireeDelete()
+    setRetireResult(`${result.status}: ${result.message}`)
+  } catch (error: unknown) {
+    setRetireResult(getApiErrorMessage(error))
+  } finally {
+    setIsRetiring(false)
+  }
+}
 
   const departmentDescribedBy = getDescribedBy(
     isLoadingDepartments ? 'department-loading' : '',
@@ -260,6 +275,15 @@ export function EmployeeListPage() {
           </button>
         </div>
       </section>
+
+      {/* ↓↓↓ 開発・テスト用（本番では削除予定） ↓↓↓ */}
+      <section style={{ marginTop: '32px', padding: '12px', border: '1px dashed #999' }}>
+        <button type="button" disabled={isRetiring} onClick={handleRetireeDeleteTest}>
+          {isRetiring ? '実行中...' : '【テスト】退職者削除バッチ実行'}
+        </button>
+        {retireResult && <p>{retireResult}</p>}
+      </section>
+      {/* ↑↑↑ 開発・テスト用（本番では削除予定） ↑↑↑ */}
     </section>
   )
 }
