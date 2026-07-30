@@ -30,13 +30,18 @@ const EXPORT_DETAILS = {
   },
 } as const
 
+type ExportMessage = {
+  type: 'success' | 'error'
+  text: string
+}
+
 export function CsvExportPage() {
   const [exportType, setExportType] =
     useState<CsvExportType>(CSV_EXPORT_TYPE.hr)
   const [targetMonth, setTargetMonth] = useState(getCurrentMonth())
   const [exporting, setExporting] = useState(false)
-  const [noticeMessage, setNoticeMessage] = useState('')
-  const [exportFailed, setExportFailed] = useState(false)
+  const [exportMessage, setExportMessage] =
+    useState<ExportMessage | null>(null)
 
   const exportDetails = EXPORT_DETAILS[exportType]
   const targetMonthToken = targetMonth.replace('-', '')
@@ -46,26 +51,28 @@ export function CsvExportPage() {
 
   const selectExportType = (nextType: CsvExportType) => {
     setExportType(nextType)
-    setNoticeMessage('')
-    setExportFailed(false)
+    setExportMessage(null)
   }
 
   const handleExport = async () => {
     if (exporting) return
     if (!targetMonth) {
-      setNoticeMessage(ATTENDANCE_MESSAGES.targetMonthRequired)
-      setExportFailed(true)
+      setExportMessage({
+        type: 'error',
+        text: ATTENDANCE_MESSAGES.targetMonthRequired,
+      })
       return
     }
     if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(targetMonth)) {
-      setNoticeMessage(ATTENDANCE_MESSAGES.targetMonthInvalid)
-      setExportFailed(true)
+      setExportMessage({
+        type: 'error',
+        text: ATTENDANCE_MESSAGES.targetMonthInvalid,
+      })
       return
     }
 
     setExporting(true)
-    setNoticeMessage('')
-    setExportFailed(false)
+    setExportMessage(null)
 
     try {
       const downloadedCsv =
@@ -74,18 +81,21 @@ export function CsvExportPage() {
           : await exportManagementCsv(targetMonth)
 
       downloadCsv(downloadedCsv)
-      setNoticeMessage(
-        exportType === CSV_EXPORT_TYPE.hr
-          ? ATTENDANCE_MESSAGES.hrCsvExportSuccess
-          : ATTENDANCE_MESSAGES.managementCsvExportSuccess,
-      )
+      setExportMessage({
+        type: 'success',
+        text:
+          exportType === CSV_EXPORT_TYPE.hr
+            ? ATTENDANCE_MESSAGES.hrCsvExportSuccess
+            : ATTENDANCE_MESSAGES.managementCsvExportSuccess,
+      })
     } catch (error) {
       const responseMessage =
         await getCsvExportApiErrorMessage(error)
-      setNoticeMessage(
-        responseMessage || ATTENDANCE_MESSAGES.csvExportFailed,
-      )
-      setExportFailed(true)
+      setExportMessage({
+        type: 'error',
+        text:
+          responseMessage || ATTENDANCE_MESSAGES.csvExportFailed,
+      })
     } finally {
       setExporting(false)
     }
@@ -156,8 +166,7 @@ export function CsvExportPage() {
                 disabled={exporting}
                 onChange={(event) => {
                   setTargetMonth(event.target.value)
-                  setNoticeMessage('')
-                  setExportFailed(false)
+                  setExportMessage(null)
                 }}
               />
             </label>
@@ -206,12 +215,19 @@ export function CsvExportPage() {
                 </div>
               </div>
 
-              {noticeMessage && (
+              {exportMessage && (
                 <div
-                  className="attendance-export-notice"
-                  role={exportFailed ? 'alert' : 'status'}
+                  className={
+                    `attendance-export-message attendance-alert ` +
+                    `attendance-alert-${exportMessage.type}`
+                  }
+                  role={
+                    exportMessage.type === 'error'
+                      ? 'alert'
+                      : 'status'
+                  }
                 >
-                  {noticeMessage}
+                  {exportMessage.text}
                 </div>
               )}
             </section>

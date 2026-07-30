@@ -397,10 +397,6 @@ export function AttendancePage() {
         <div className="attendance-page">
             <div className="attendance-page-header">
                 <div>
-                    <p className="attendance-page-eyebrow">
-                        ATTENDANCE MANAGEMENT
-                    </p>
-
                     <h2>勤怠管理</h2>
 
                     <p className="attendance-page-description">
