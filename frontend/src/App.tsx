@@ -13,6 +13,7 @@ import { EmployeeListPage } from './features/employees/EmployeeListPage'
 import { EmployeeDetailPage } from './features/employees/EmployeeDetailPage'
 import { EmployeeCreatePage } from './features/employees/EmployeeCreatePage'
 import { EmployeeEditPage } from './features/employees/EmployeeEditPage'
+import { RetireeDeleteAdminPage } from './features/retiree/pages/RetireeDeleteAdminPage'
 import './App.css'
 
 function RootRedirect() {
@@ -56,6 +57,7 @@ function App() {
               path={ROUTES.attendances}
               element={<AttendancePage />}
             />
+            <Route path={ROUTES.retireeDelete} element={<RetireeDeleteAdminPage />} />
             <Route
               path={ROUTES.attendanceImport}
               element={<AttendanceImportPage />}

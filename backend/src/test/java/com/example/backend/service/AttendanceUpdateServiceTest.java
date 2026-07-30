@@ -42,7 +42,13 @@ class AttendanceUpdateServiceTest {
     @Mock
     private MessageService messageService;
 
-    private AttendanceUpdateService service;
+    @Mock
+    private SalaryCalculationService salaryCalculationService;
+
+    @Mock
+    private SalaryResultTransactionHelper salaryResultTransactionHelper;
+
+   private AttendanceUpdateService service;
 
     @BeforeEach
     void setUp() {
@@ -51,8 +57,11 @@ class AttendanceUpdateServiceTest {
                         attendanceRepository,
                         inputValidationService,
                         deadlineService,
-                        messageService);
+                        messageService,
+                        salaryCalculationService,
+                        salaryResultTransactionHelper);
     }
+    
 
     @Test
     void normalAttendanceIsUpdated() {

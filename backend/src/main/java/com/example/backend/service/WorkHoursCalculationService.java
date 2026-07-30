@@ -23,9 +23,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
  
 /**
-* 勤怠実績から稼働時間・残業時間を算出する共通ロジック。
+* 勤怠実績から稼働時間・残業時間・休日出勤時間・不足時間を算出する共通ロジック。
 *
-* 稼働時間・残業時間はBigDecimal（スケール2、四捨五入）で計算する。
+* 稼働時間等はBigDecimal（スケール2、四捨五入）で計算する。
 * 出勤時刻が何時であっても補正は行わない（早出分もそのまま実働時間に含める）。
 */
 @Slf4j
@@ -40,10 +40,11 @@ public class WorkHoursCalculationService {
     private final HolidayRepository holidayRepository;
  
     /**
-     * 対象社員・対象年月の稼働時間・残業時間を集計する。
+     * 対象社員・対象年月の稼働時間・残業時間・休日出勤時間・不足時間を集計する。
      * NORMAL：出退勤時刻から実働時間をそのまま算出し、8時間を超えた分を残業時間とする。
-     * HOLIDAY_WORK：実働時間を全て残業時間として計上する。
-     * PAID_LEAVE：実働8時間とみなす。ABSENCE：実働0とする。
+     *         8時間に満たない分は不足時間とする。
+     * HOLIDAY_WORK：実働時間を全て休日出勤時間として計上する。
+     * PAID_LEAVE：実働8時間とみなす。ABSENCE：実働0とし、8時間を不足時間とする。
      */
     public WorkHoursResult calculateWorkHours(Long employeeId, LocalDate targetMonthStart, LocalDate targetMonthEnd) {
         List<Attendance> attendanceList =
@@ -58,22 +59,23 @@ public class WorkHoursCalculationService {
  
     private WorkHoursResult calculateDailyHours(Attendance attendance) {
         String workType = attendance.getWorkType();
+        BigDecimal zero = BigDecimal.ZERO.setScale(SCALE, ROUNDING);
  
         if (WorkType.NORMAL.equals(workType)) {
             BigDecimal hours = actualHours(attendance);
-            BigDecimal overtime = hours.subtract(SalaryConstants.STANDARD_WORK_HOURS)
-                    .max(BigDecimal.ZERO.setScale(SCALE, ROUNDING));
+            BigDecimal overtime = hours.subtract(SalaryConstants.STANDARD_WORK_HOURS).max(zero);
             BigDecimal regular = hours.subtract(overtime);
-            return new WorkHoursResult(regular, overtime);
+            BigDecimal shortfall = SalaryConstants.STANDARD_WORK_HOURS.subtract(hours).max(zero);
+            return new WorkHoursResult(regular, overtime, zero, shortfall);
         }
         if (WorkType.HOLIDAY_WORK.equals(workType)) {
-            return new WorkHoursResult(BigDecimal.ZERO.setScale(SCALE, ROUNDING), actualHours(attendance));
+            return new WorkHoursResult(zero, zero, actualHours(attendance), zero);
         }
         if (WorkType.PAID_LEAVE.equals(workType)) {
-            return new WorkHoursResult(SalaryConstants.STANDARD_WORK_HOURS, BigDecimal.ZERO.setScale(SCALE, ROUNDING));
+            return new WorkHoursResult(SalaryConstants.STANDARD_WORK_HOURS, zero, zero, zero);
         }
-        // ABSENCE、その他未定義値は実働0として扱う
-        return WorkHoursResult.zero();
+        // ABSENCE、その他未定義値は実働0・不足8時間として扱う
+        return new WorkHoursResult(zero, zero, zero, SalaryConstants.STANDARD_WORK_HOURS);
     }
  
     private BigDecimal actualHours(Attendance attendance) {

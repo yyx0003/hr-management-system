@@ -12,4 +12,5 @@ export const ROUTES = {
   position: '/position',
   qualification: '/qualification',
   skillgrade: '/skillgrade',
+  retireeDelete: '/retiree-delete',
 } as const

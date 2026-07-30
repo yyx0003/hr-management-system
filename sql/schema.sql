@@ -231,3 +231,4 @@ COMMENT ON COLUMN salary_result.department_id IS '対象年月時点での部署
 CREATE INDEX idx_employee_retire_date ON employee (retire_date);
 CREATE INDEX idx_attendance_work_date ON attendance (work_date);
 CREATE INDEX idx_salary_result_target ON salary_result (target_year, target_month);
+ALTER TABLE salary_result ADD COLUMN total_holiday_work_hours NUMERIC(6,2) NOT NULL DEFAULT 0;

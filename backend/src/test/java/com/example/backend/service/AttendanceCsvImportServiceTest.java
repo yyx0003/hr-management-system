@@ -52,6 +52,10 @@ class AttendanceCsvImportServiceTest {
 
     @Mock
     private MultipartFile file;
+    @Mock
+private SalaryCalculationService salaryCalculationService;
+@Mock
+private SalaryResultTransactionHelper salaryResultTransactionHelper;
 
     private AttendanceCsvImportService service;
 
@@ -62,7 +66,9 @@ class AttendanceCsvImportServiceTest {
                 attendanceCsvParserService,
                 attendanceCsvValidationService,
                 attendanceRepository,
-                messageService);
+                messageService,
+                salaryCalculationService,
+                salaryResultTransactionHelper);
     }
 
     @Test

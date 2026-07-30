@@ -37,6 +37,9 @@ class AttendanceMonthlyDeleteServiceTest {
     @Mock
     private MessageService messageService;
 
+    @Mock
+    private SalaryResultTransactionHelper salaryResultTransactionHelper;
+
     private AttendanceMonthlyDeleteService service;
 
     @BeforeEach
@@ -46,7 +49,8 @@ class AttendanceMonthlyDeleteServiceTest {
                 new AttendanceMonthlyDeleteService(
                         attendanceRepository,
                         deadlineService,
-                        messageService);
+                        messageService,
+                        salaryResultTransactionHelper);
     }
 
     @Test
@@ -82,6 +86,10 @@ class AttendanceMonthlyDeleteServiceTest {
                         LOGIN_EMPLOYEE_ID,
                         LocalDate.of(2026, 7, 1),
                         LocalDate.of(2026, 7, 31));
+        verify(salaryResultTransactionHelper)
+                .deleteSalaryResultOnly(
+                        LOGIN_EMPLOYEE_ID,
+                        TARGET_MONTH);
     }
 
     @Test
@@ -138,6 +146,12 @@ class AttendanceMonthlyDeleteServiceTest {
                 never())
                 .deleteByEmployeeIdAndTargetMonth(
                         org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any());
+        verify(
+                salaryResultTransactionHelper,
+                never())
+                .deleteSalaryResultOnly(
                         org.mockito.ArgumentMatchers.any(),
                         org.mockito.ArgumentMatchers.any());
     }
