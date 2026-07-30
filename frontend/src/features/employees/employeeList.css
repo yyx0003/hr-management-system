@@ -92,6 +92,10 @@
   justify-content: flex-end;
 }
 
+.employee-list-actions {
+  flex-wrap: wrap;
+}
+
 .employee-primary-button,
 .employee-secondary-button {
   min-height: 42px;
@@ -116,6 +120,32 @@
   border: 1px solid #64748b;
   color: #334155;
   background: #fff;
+}
+
+.employee-list-action-button {
+  width: 136px;
+}
+
+.employee-list-secondary-action {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.employee-list-secondary-action:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+.employee-list-back-button:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.employee-list-actions button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.employee-list-actions button:focus-visible {
+  outline: 3px solid rgb(37 99 235 / 35%);
+  outline-offset: 2px;
 }
 
 .employee-primary-button:disabled,
@@ -254,6 +284,11 @@
   .employee-form-actions,
   .employee-list-actions {
     flex-direction: column;
+  }
+
+  .employee-list-action-button,
+  .employee-list-back-button {
+    width: 100%;
   }
 
   .employee-form-actions {

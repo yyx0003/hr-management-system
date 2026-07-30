@@ -5,5 +5,6 @@ export const EMPLOYEE_MESSAGES = {
   departmentLoading: '部署を読み込み中です。',
   searchNotFound: '該当する社員情報が存在しません。',
   selectRequired: '更新する社員を選択してください。',
+  detailSelectRequired: '詳細を表示する社員を選択してください。',
   noPosition: '役職なし',
 } as const
