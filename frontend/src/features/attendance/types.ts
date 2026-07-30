@@ -31,6 +31,11 @@ export interface AttendanceUpdateRequest {
   workType: WorkType
 }
 
+export interface AttendanceMonthlyDeleteResponse {
+  deletedCount: number
+  message: string
+}
+
 export interface CsvImportError {
   lineNumber: number
   itemName: string

@@ -4,6 +4,7 @@ export const ATTENDANCE_MESSAGES = {
   registerFailed: '勤怠情報の登録に失敗しました。',
   updateSuccess: '勤怠情報を更新しました。',
   updateFailed: '勤怠情報の更新に失敗しました。',
+  monthlyDeleteFailed: '勤怠データの削除に失敗しました。',
   csvFileRequired: 'CSVファイルを選択してください。',
   csvFileTypeInvalid: 'CSV形式のファイルを選択してください。',
   csvFileSizeExceeded: 'ファイルサイズが5MBを超えています。',

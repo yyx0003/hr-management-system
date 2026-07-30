@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,11 +27,13 @@ import com.example.backend.common.exception.BusinessException;
 import com.example.backend.dto.attendance.AttendanceCreateRequest;
 import com.example.backend.dto.attendance.AttendanceCsvImportResponse;
 import com.example.backend.dto.attendance.AttendanceListResponse;
+import com.example.backend.dto.attendance.AttendanceMonthlyDeleteResponse;
 import com.example.backend.dto.attendance.AttendanceUpdateRequest;
 import com.example.backend.dto.csv.CsvFileData;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
 import com.example.backend.service.AttendanceCsvExportService;
 import com.example.backend.service.AttendanceCsvImportService;
+import com.example.backend.service.AttendanceMonthlyDeleteService;
 import com.example.backend.service.AttendanceRegistrationService;
 import com.example.backend.service.AttendanceUpdateService;
 import com.example.backend.service.EmployeeService;
@@ -51,6 +54,7 @@ public class AttendanceController {
     private final AttendanceUpdateService attendanceUpdateService;
     private final AttendanceCsvImportService attendanceCsvImportService;
     private final AttendanceCsvExportService attendanceCsvExportService;
+    private final AttendanceMonthlyDeleteService attendanceMonthlyDeleteService;
     private final EmployeeService employeeService;
     private final MessageService messageService;
 
@@ -137,6 +141,36 @@ public class AttendanceController {
                 request);
 
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * ログイン社員の対象月勤怠情報を全件削除する。
+     *
+     * DELETE /api/attendances?targetMonth=2026-07
+     *
+     * @param targetMonth 削除対象年月（yyyy-MM）
+     * @param principal ログイン情報
+     * @return 削除結果
+     */
+    @DeleteMapping
+    public ResponseEntity<AttendanceMonthlyDeleteResponse>
+            deleteMonthlyAttendances(
+                    @RequestParam(required = false)
+                            String targetMonth,
+                    Principal principal) {
+
+        Long employeeId =
+                getLoginEmployeeId(principal);
+
+        YearMonth targetYearMonth =
+                parseTargetMonth(targetMonth);
+
+        AttendanceMonthlyDeleteResponse response =
+                attendanceMonthlyDeleteService.deleteMonthlyAttendances(
+                        employeeId,
+                        targetYearMonth);
+
+        return ResponseEntity.ok(response);
     }
 
     /**

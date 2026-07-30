@@ -8,6 +8,8 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../../constants/routes'
 import {
+    deleteMonthlyAttendances,
+    getAttendanceDeleteApiErrorMessage,
     getAttendanceApiErrorMessage,
     getMonthlyAttendances,
     registerAttendance,
@@ -163,6 +165,7 @@ export function AttendancePage() {
     >({})
     const [loading, setLoading] = useState(false)
     const [savingDate, setSavingDate] = useState<string | null>(null)
+    const [deleting, setDeleting] = useState(false)
     const [message, setMessage] = useState('')
     const [errorMessage, setErrorMessage] = useState('')
 
@@ -391,6 +394,40 @@ export function AttendancePage() {
         event: ChangeEvent<HTMLInputElement>,
     ) => {
         setTargetMonth(event.target.value)
+        setMessage('')
+        setErrorMessage('')
+    }
+
+    const handleMonthlyDelete = async () => {
+        if (deleting || isClosed) return
+
+        const confirmed = window.confirm(
+            `${formatTargetMonth(targetMonth)}の勤怠データをすべて削除します。\n`
+            + 'この操作は元に戻せません。よろしいですか？',
+        )
+
+        if (!confirmed) return
+
+        setDeleting(true)
+        setMessage('')
+        setErrorMessage('')
+
+        try {
+            const response =
+                await deleteMonthlyAttendances(targetMonth)
+
+            await loadAttendances()
+            setMessage(response.message)
+        } catch (error: unknown) {
+            setErrorMessage(
+                getAttendanceDeleteApiErrorMessage(
+                    error,
+                    ATTENDANCE_MESSAGES.monthlyDeleteFailed,
+                ),
+            )
+        } finally {
+            setDeleting(false)
+        }
     }
 
     return (
@@ -406,9 +443,26 @@ export function AttendancePage() {
 
                 <div className="attendance-header-actions">
                     <button
+                        className="attendance-secondary-button attendance-danger-button"
+                        type="button"
+                        disabled={
+                            isClosed
+                            || deleting
+                            || loading
+                            || savingDate !== null
+                            || !targetMonth
+                        }
+                        onClick={() => void handleMonthlyDelete()}
+                    >
+                        {deleting
+                            ? '削除中...'
+                            : '対象月データを削除'}
+                    </button>
+
+                    <button
                         className="attendance-secondary-button"
                         type="button"
-                        disabled={isClosed}
+                        disabled={isClosed || deleting}
                         onClick={() => navigate(ROUTES.attendanceImport)}
                     >
                         <svg
@@ -434,6 +488,7 @@ export function AttendancePage() {
                         aria-label="前月"
                         className="attendance-month-button"
                         type="button"
+                        disabled={deleting}
                         onClick={() =>
                             setTargetMonth((current) =>
                                 changeMonth(current, -1)
@@ -449,6 +504,7 @@ export function AttendancePage() {
                         <input
                             type="month"
                             value={targetMonth}
+                            disabled={deleting}
                             onChange={handleMonthChange}
                         />
                     </label>
@@ -457,6 +513,7 @@ export function AttendancePage() {
                         aria-label="翌月"
                         className="attendance-month-button"
                         type="button"
+                        disabled={deleting}
                         onClick={() =>
                             setTargetMonth((current) =>
                                 changeMonth(current, 1)
@@ -469,7 +526,7 @@ export function AttendancePage() {
                     <button
                         className="attendance-secondary-button"
                         type="button"
-                        disabled={loading}
+                        disabled={loading || deleting}
                         onClick={() => void loadAttendances()}
                     >
                         ↻ 再読込
