@@ -1,0 +1,2364 @@
+.attendance-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.attendance-page-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.attendance-page-header h2 {
+  color: #172033;
+  font-size: 30px;
+  letter-spacing: 0.02em;
+  margin: 4px 0 8px;
+}
+
+.attendance-page-eyebrow {
+  color: #5067d8;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin: 0;
+}
+
+.attendance-page-description {
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.attendance-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.attendance-card {
+  background: #ffffff;
+  border: 1px solid #e6eaf0;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgb(31 44 74 / 5%);
+}
+
+.attendance-filter-card {
+  align-items: stretch;
+  display: flex;
+  gap: 28px;
+  justify-content: space-between;
+  padding: 22px 24px;
+}
+
+.attendance-filter-controls {
+  align-items: flex-end;
+  display: flex;
+  flex: 1 1 auto;
+  gap: 12px;
+  min-width: 420px;
+}
+
+.attendance-month-field,
+.attendance-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.attendance-month-field span,
+.attendance-form-field span {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.attendance-month-field input,
+.attendance-form-field input,
+.attendance-table input,
+.attendance-table select {
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  color: #1d2939;
+  font: inherit;
+  min-height: 38px;
+  padding: 7px 10px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.attendance-table input[type='time'] {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  width: 180px;
+}
+
+.attendance-table select {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+
+.attendance-table .attendance-work-type-control select {
+  max-width: 100%;
+  width: 200px;
+}
+
+.attendance-month-field input:focus,
+.attendance-form-field input:focus,
+.attendance-table input:focus,
+.attendance-table select:focus {
+  border-color: #6172f3;
+  box-shadow: 0 0 0 3px rgb(97 114 243 / 14%);
+  outline: none;
+}
+
+.attendance-table input:disabled,
+.attendance-table select:disabled,
+.attendance-month-field input:disabled,
+.attendance-form-field input:disabled {
+  background: #f4f6f8;
+  border-color: #e4e7ec;
+  color: #98a2b3;
+  cursor: not-allowed;
+}
+
+.attendance-primary-button,
+.attendance-secondary-button,
+.attendance-row-save-button,
+.attendance-month-button {
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.attendance-primary-button {
+  background: #5267df;
+  border: 1px solid #5267df;
+  color: #ffffff;
+  min-height: 42px;
+  padding: 9px 18px;
+}
+
+.attendance-primary-button:hover:not(:disabled) {
+  background: #4257ca;
+  box-shadow: 0 7px 16px rgb(82 103 223 / 22%);
+  transform: translateY(-1px);
+}
+
+/* CSV取込ボタン */
+.attendance-secondary-button {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cbd4df;
+  color: #344054;
+  display: inline-flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: 42px;
+  min-width: 116px;
+  padding: 9px 16px;
+}
+
+.attendance-secondary-button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #aebbc9;
+  box-shadow: 0 3px 8px rgb(16 24 40 / 6%);
+  color: #243447;
+  transform: translateY(-1px);
+}
+
+.attendance-secondary-button:active:not(:disabled) {
+  background: #f2f5f8;
+  box-shadow: none;
+  transform: translateY(0);
+}
+
+.attendance-secondary-button:focus-visible {
+  border-color: #91a1b3;
+  box-shadow: 0 0 0 3px rgb(145 161 179 / 16%);
+  outline: none;
+}
+
+.attendance-secondary-button:disabled {
+  background: #f8fafc;
+  border-color: #e1e6ec;
+  box-shadow: none;
+  color: #98a2b3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* CSV取込ボタンのアイコン */
+.attendance-secondary-button-icon {
+  fill: none;
+  flex: 0 0 auto;
+  height: 17px;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 17px;
+}
+
+.attendance-month-button {
+  align-items: center;
+  background: #f2f4f7;
+  border: 1px solid transparent;
+  color: #344054;
+  display: inline-flex;
+  font-size: 24px;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.attendance-month-button:hover:not(:disabled) {
+  background: #e9edf3;
+  border-color: #dce1e8;
+}
+
+.attendance-row-save-button {
+  background: #eef1ff;
+  border: 1px solid #d8defe;
+  color: #3f51bd;
+  min-width: 68px;
+  padding: 7px 12px;
+}
+
+.attendance-row-save-button:hover:not(:disabled) {
+  background: #e2e7ff;
+  border-color: #c7d0fd;
+}
+
+.attendance-primary-button:disabled,
+.attendance-secondary-button:disabled,
+.attendance-row-save-button:disabled,
+.attendance-month-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+  transform: none;
+}
+
+
+.attendance-summary-grid {
+  border-left: 1px solid #eaecf0;
+  display: grid;
+  flex: 0 1 610px;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  padding-left: 28px;
+}
+
+.attendance-summary-card {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 13px;
+  box-shadow: none;
+  display: flex;
+  gap: 13px;
+  min-height: 82px;
+  padding: 13px 16px;
+}
+
+.attendance-summary-icon {
+  align-items: center;
+  border: 2px solid currentcolor;
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 18px;
+  font-weight: 800;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.attendance-summary-label {
+  color: #475467;
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+
+.attendance-summary-value {
+  color: #172033;
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.attendance-summary-value small {
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.attendance-summary-registered {
+  background: #f8fdf9;
+  border-color: #d3f0dd;
+}
+
+.attendance-summary-registered .attendance-summary-icon {
+  color: #16864b;
+}
+
+.attendance-summary-unregistered {
+  background: #fbfcfd;
+}
+
+.attendance-summary-unregistered .attendance-summary-icon {
+  color: #667085;
+}
+
+.attendance-summary-calendar {
+  background: #f8faff;
+  border-color: #dce4ff;
+}
+
+.attendance-summary-calendar .attendance-summary-icon {
+  color: #3157d5;
+}
+
+.attendance-deadline {
+  align-items: center;
+  background: #f6f7ff;
+  border: 1px solid #dfe3ff;
+  border-radius: 12px;
+  color: #344054;
+  display: flex;
+  gap: 14px;
+  padding: 13px 16px;
+}
+
+.attendance-deadline strong {
+  color: #4257ca;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.attendance-deadline span {
+  font-size: 14px;
+}
+
+.attendance-deadline-closed {
+  background: #fef3f2;
+  border-color: #fecdca;
+  color: #912018;
+}
+
+.attendance-deadline-closed strong {
+  color: #b42318;
+}
+
+.attendance-alert {
+  border-radius: 10px;
+  font-size: 14px;
+  padding: 13px 16px;
+}
+
+.attendance-alert-success {
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+  color: #067647;
+}
+
+.attendance-alert-error {
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  color: #b42318;
+}
+
+.attendance-toast {
+  align-items: center;
+  animation: attendance-toast-in 0.22s ease-out;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgb(16 24 40 / 12%);
+  display: flex;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 10px;
+  padding: 13px 16px;
+}
+
+.attendance-toast-success {
+  background: #ffffff;
+  border: 1px solid #abefc6;
+  color: #067647;
+}
+
+.attendance-toast-icon {
+  align-items: center;
+  background: #dcfae6;
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 12px;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+@keyframes attendance-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.attendance-table-card {
+  overflow: hidden;
+}
+
+.attendance-table-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 22px 14px;
+}
+
+.attendance-table-heading h3 {
+  color: #1d2939;
+  margin: 0 0 4px;
+}
+
+.attendance-table-heading p {
+  color: #667085;
+  font-size: 13px;
+  margin: 0;
+}
+
+.attendance-table-wrapper {
+  overflow-x: auto;
+}
+
+.attendance-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.attendance-table th {
+  background: #f8f9fc;
+  border-bottom: 1px solid #eaecf0;
+  color: #475467;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  padding: 12px 10px;
+  box-sizing: border-box;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.attendance-table td {
+  border-bottom: 1px solid #eef1f5;
+  color: #344054;
+  font-size: 14px;
+  padding: 11px 10px;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.attendance-table th:nth-child(1) {
+  width: 7.5%;
+}
+
+.attendance-table th:nth-child(2) {
+  width: 7.5%;
+}
+
+.attendance-table th:nth-child(3) {
+  width: 10.5%;
+}
+
+.attendance-table th:nth-child(4) {
+  width: 17%;
+}
+
+.attendance-table th:nth-child(5),
+.attendance-table th:nth-child(6) {
+  width: 12.25%;
+}
+
+.attendance-table th:nth-child(7) {
+  width: 9%;
+}
+
+.attendance-table th:nth-child(8) {
+  width: 9.5%;
+}
+
+.attendance-table th:nth-child(9) {
+  width: 9%;
+}
+
+.attendance-table th:nth-child(7),
+.attendance-table th:nth-child(8),
+.attendance-table th:nth-child(9),
+.attendance-table td:nth-child(7),
+.attendance-table td:nth-child(8),
+.attendance-table td:nth-child(9) {
+  text-align: center;
+}
+
+.attendance-work-status {
+  box-sizing: border-box;
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 48px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+.attendance-table td:nth-child(9) .attendance-row-save-button {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.attendance-work-status-early {
+  background: #fff4e8;
+  color: #9a5415;
+}
+
+.attendance-work-status-overtime {
+  background: #f3effb;
+  color: #6941a5;
+}
+
+.attendance-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.attendance-table tbody tr {
+  transition: background 0.12s ease;
+}
+
+.attendance-table tbody tr:hover {
+  background: #fafbff;
+}
+
+.attendance-holiday-row {
+  background: #fffafb;
+}
+
+.attendance-holiday-row:hover {
+  background: #fff6f7 !important;
+}
+
+.attendance-date-cell {
+  font-weight: 700;
+}
+
+.attendance-day {
+  align-items: center;
+  background: #f2f4f7;
+  border-radius: 50%;
+  display: inline-flex;
+  font-size: 12px;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.attendance-day-土 {
+  background: #eff8ff;
+  color: #175cd3;
+}
+
+.attendance-day-日 {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.attendance-holiday-label {
+  background: #fff1f3;
+  border-radius: 999px;
+  color: #c01048;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.attendance-muted {
+  color: #98a2b3;
+}
+
+.attendance-status {
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+.attendance-status-registered {
+  background: #ecfdf3;
+  color: #067647;
+}
+
+.attendance-status-unregistered {
+  background: #f2f4f7;
+  color: #667085;
+}
+
+.attendance-status-holiday {
+  background: #fff1f3;
+  color: #c01048;
+}
+
+.attendance-empty-cell {
+  color: #667085 !important;
+  padding: 36px !important;
+  text-align: center;
+}
+
+.attendance-export-card {
+  padding: 24px;
+}
+
+.attendance-error-list {
+  overflow: hidden;
+}
+
+.attendance-error-message-cell {
+  color: #b42318 !important;
+}
+
+.attendance-tabs {
+  border-bottom: 1px solid #eaecf0;
+  display: flex;
+  gap: 4px;
+}
+
+.attendance-tab {
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  color: #667085;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 13px 20px;
+  outline: none;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.attendance-tab:hover {
+  background: #fafbff;
+  color: #4257ca;
+}
+
+.attendance-tab-active {
+  border-bottom-color: #5267df;
+  color: #4257ca;
+}
+
+.attendance-tab:focus-visible {
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px rgb(82 103 223 / 16%);
+}
+
+.attendance-export-card {
+  box-shadow: 0 12px 32px rgb(20 33 61 / 6%);
+}
+
+.attendance-export-page .attendance-page-description {
+  color: #344054;
+}
+
+.attendance-export-inner {
+  max-width: 860px;
+  width: 100%;
+}
+
+.attendance-export-card .attendance-tabs {
+  border-bottom: 0;
+  gap: 24px;
+}
+
+.attendance-export-card .attendance-tab {
+  color: #475467;
+  min-height: 48px;
+  padding: 8px 2px;
+}
+
+.attendance-export-card .attendance-tab:hover {
+  background: transparent;
+}
+
+.attendance-export-card .attendance-tab-active {
+  border-bottom-width: 3px;
+  color: #3349ad;
+}
+
+.attendance-export-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 24px;
+}
+
+.attendance-export-heading h3 {
+  color: #14213d;
+  margin: 0 0 6px;
+}
+
+.attendance-export-heading p {
+  color: #344054;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.attendance-export-month-field {
+  margin-top: 22px;
+  width: 270px;
+}
+
+.attendance-export-month-field input {
+  border-radius: 8px;
+  min-height: 44px;
+}
+
+.attendance-export-month-field input:focus {
+  border-color: #8193cf;
+  box-shadow: 0 0 0 3px rgb(82 99 184 / 12%);
+}
+
+.attendance-export-file-card {
+  background: linear-gradient(145deg, #fafcfe 0%, #f6f9fc 100%);
+  border: 1px solid #e3e8f0;
+  border-radius: 12px;
+  box-sizing: border-box;
+  box-shadow: 0 6px 18px rgb(20 33 61 / 4%);
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+  max-width: 820px;
+  min-height: 230px;
+  padding: 28px 30px;
+  width: 100%;
+}
+
+.attendance-export-file-title {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.attendance-export-csv-label {
+  align-items: center;
+  background: #e5ebf2;
+  border-radius: 6px;
+  color: #536273;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  height: 34px;
+  justify-content: center;
+  width: 42px;
+}
+
+.attendance-export-file-title h4 {
+  color: #26384b;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.attendance-export-file-card > p {
+  color: #344054;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 14px 0 0;
+}
+
+.attendance-export-file-footer {
+  align-items: center;
+  border-top: 1px solid #e6eaf0;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin-top: 26px;
+  padding-top: 19px;
+}
+
+.attendance-export-file-meta {
+  align-items: center;
+  color: #3f4d5c;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 12px;
+}
+
+.attendance-import-actions.attendance-export-actions {
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+
+.attendance-export-message {
+  margin-top: 14px;
+  white-space: pre-line;
+}
+
+.attendance-export-button {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.attendance-import-actions.attendance-export-actions
+  .attendance-primary-button:hover:not(:disabled) {
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.attendance-export-download-icon {
+  fill: none;
+  height: 17px;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+  width: 17px;
+}
+
+.attendance-export-spinner {
+  animation: attendance-import-spin 0.8s linear infinite;
+  border: 2px solid rgb(255 255 255 / 45%);
+  border-radius: 50%;
+  border-top-color: currentcolor;
+  height: 14px;
+  width: 14px;
+}
+
+@media (max-width: 1200px) {
+  .attendance-filter-card {
+    flex-direction: column;
+  }
+
+  .attendance-summary-grid {
+    border-left: 0;
+    border-top: 1px solid #eaecf0;
+    flex-basis: auto;
+    padding-left: 0;
+    padding-top: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .attendance-page-header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 860px) {
+  .attendance-export-month-field {
+    width: 100%;
+  }
+
+  .attendance-export-file-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .attendance-export-file-card {
+    padding: 26px 20px;
+  }
+
+  .attendance-export-file-meta {
+    gap: 8px 20px;
+  }
+
+  .attendance-import-actions.attendance-export-actions
+    .attendance-primary-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .attendance-filter-controls {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .attendance-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .attendance-filter-card {
+    align-items: stretch;
+  }
+
+  .attendance-month-field {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .attendance-header-actions {
+    width: 100%;
+  }
+
+  .attendance-header-actions button {
+    flex: 1;
+  }
+
+  .attendance-deadline {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+/* 入力期限：期限までの日数で状態を切り替える */
+.attendance-deadline {
+  align-items: center;
+  align-self: flex-start;
+  border: 1px solid;
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 10px;
+  max-width: 100%;
+  padding: 10px 16px;
+  width: fit-content;
+}
+
+.attendance-deadline-content {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.attendance-deadline-content strong {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.attendance-deadline-content span {
+  font-size: 14px;
+}
+
+.attendance-deadline-icon {
+  align-items: center;
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 15px;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+/* 締切まで8日以上：カレンダー・青灰色 */
+.attendance-deadline-normal {
+  background: #f4f7fb;
+  border-color: #cfd9e8;
+  color: #41556f;
+}
+
+.attendance-deadline-normal strong {
+  color: #3157a6;
+}
+
+.attendance-deadline-normal .attendance-deadline-icon {
+  background: #e8eef7;
+  color: #3157a6;
+}
+
+/* 締切まで0～7日：火・オレンジ色 */
+.attendance-deadline-warning {
+    background: #fbf7f1;
+    border-color: #e6d2b8;
+    color: #735a3f;
+    box-shadow: none;
+}
+
+.attendance-deadline-warning strong {
+    color: #8a6034;
+}
+
+.attendance-deadline-warning .attendance-deadline-icon {
+    background: #f3e7d8;
+    color: inherit;
+}
+
+.attendance-deadline-fire {
+    display: block;
+    font-size: 16px;
+    line-height: 1;
+    transform: translateY(-1px);
+}
+/* 締切済み：警告・赤色 */
+.attendance-deadline-closed {
+  background: #fef3f2;
+  border-color: #f0b9b5;
+  color: #912018;
+}
+
+.attendance-deadline-closed strong {
+  color: #b42318;
+}
+
+.attendance-deadline-closed .attendance-deadline-icon {
+  background: #fee4e2;
+  color: #d92d20;
+}
+
+/* 勤務区分：白い入力欄＋補助色の小さな点 */
+.attendance-work-type-control {
+  align-items: center;
+  display: flex;
+  position: relative;
+}
+
+.attendance-work-type-control select {
+  background: #ffffff !important;
+  border-color: #d0d5dd !important;
+  color: #1d2939 !important;
+  font-weight: 700;
+  padding-left: 30px;
+  width: 100%;
+}
+
+.attendance-work-type-control select:focus {
+  border-color: #6172f3 !important;
+}
+
+.attendance-work-type-swatch {
+  background: #5267df;
+  border-radius: 50%;
+  height: 8px;
+  left: 12px;
+  pointer-events: none;
+  position: absolute;
+  width: 8px;
+  z-index: 1;
+}
+
+/* 通常勤務 */
+.attendance-work-type-control:not(
+  .attendance-work-type-absence,
+  .attendance-work-type-holiday-work
+) .attendance-work-type-swatch {
+  background: #5267df;
+}
+
+/* 欠勤 */
+.attendance-work-type-control.attendance-work-type-absence
+  .attendance-work-type-swatch {
+  background: #d92d20;
+}
+
+/* 休日出勤 */
+.attendance-work-type-control.attendance-work-type-holiday-work
+  .attendance-work-type-swatch {
+  background: #e88b18;
+}
+
+/* 有給休暇は row.workType に応じてクラスを付けないため、
+   select の値を利用できないブラウザ向けに緑を既定上書きしない。
+   TSX 側のクラス追加で明示する。 */
+.attendance-work-type-control.attendance-work-type-paid-leave
+  .attendance-work-type-swatch {
+  background: #16864b;
+}
+
+.attendance-work-type-control select:disabled {
+  background: #f4f6f8 !important;
+  border-color: #e4e7ec !important;
+  color: #98a2b3 !important;
+}
+
+.attendance-work-type-control:has(select:disabled)
+  .attendance-work-type-swatch {
+  opacity: 0.42;
+}
+
+@media (max-width: 640px) {
+  .attendance-deadline {
+    align-items: flex-start;
+    border-radius: 14px;
+    width: 100%;
+  }
+
+  .attendance-deadline-content {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+/* ===== 2026-07-29 UI adjustment ===== */
+
+/* 入力期限：全状態を同じ長さにする */
+.attendance-deadline {
+  box-sizing: border-box;
+  min-height: 50px;
+  width: 520px;
+}
+
+.attendance-deadline-content {
+  min-width: 0;
+}
+
+.attendance-deadline-icon svg {
+  fill: none;
+  height: 17px;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 17px;
+}
+
+/* 集計カード：淡い色の塗りアイコンに統一 */
+.attendance-summary-icon {
+  border: 0;
+  height: 40px;
+  width: 40px;
+}
+
+.attendance-summary-icon svg {
+  fill: none;
+  height: 22px;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 22px;
+}
+
+.attendance-summary-calendar {
+  background: #ffffff;
+  border-color: #e4e7ec;
+}
+
+.attendance-summary-calendar .attendance-summary-icon {
+  background: #eaf3ff;
+  color: #4f7fc9;
+}
+
+.attendance-summary-registered {
+  background: #ffffff;
+  border-color: #e4e7ec;
+}
+
+.attendance-summary-registered .attendance-summary-icon {
+  background: #eaf8ef;
+  color: #4f9b67;
+}
+
+.attendance-summary-unregistered {
+  background: #ffffff;
+  border-color: #e4e7ec;
+}
+
+.attendance-summary-unregistered .attendance-summary-icon {
+  background: #fff6d9;
+  color: #b58d24;
+}
+
+/* 勤務区分：丸ではなく、少し目立つ角丸の色ブロック */
+.attendance-work-type-swatch {
+  background: #5267df;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgb(16 24 40 / 5%);
+  height: 10px;
+  left: 12px;
+  pointer-events: none;
+  position: absolute;
+  width: 10px;
+  z-index: 1;
+}
+
+.attendance-work-type-normal .attendance-work-type-swatch {
+  background: #5267df;
+}
+
+.attendance-work-type-paid-leave .attendance-work-type-swatch {
+  background: #45a86b;
+}
+
+.attendance-work-type-absence .attendance-work-type-swatch {
+  background: #d94a45;
+}
+
+.attendance-work-type-holiday-work .attendance-work-type-swatch {
+  background: #e7932f;
+}
+
+.attendance-work-type-control:has(select:disabled)
+  .attendance-work-type-swatch {
+  opacity: 0.42;
+}
+
+/* 土曜日はごく薄い青。日曜・祝日は従来の薄い赤 */
+.attendance-saturday-row {
+  background: #f8fbff;
+}
+
+.attendance-saturday-row:hover {
+  background: #f1f7ff !important;
+}
+
+.attendance-saturday-row .attendance-date-cell {
+  color: #315f9a;
+}
+
+.attendance-day-土 {
+  background: #eaf4ff;
+  color: #2e68ad;
+}
+
+.attendance-holiday-row .attendance-date-cell {
+  color: #a93c36;
+}
+
+/* 対象外は休日系と同じ赤に統一 */
+.attendance-status-target {
+ background: #fdf1f2;
+    color: #b15f67;
+}
+
+.attendance-status-editing {
+  background: #fff7e8;
+  color: #b65d12;
+}
+
+.attendance-weekend-label {
+  background: #fef3f2;
+  border-radius: 999px;
+  color: #b42318;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.attendance-saturday-row .attendance-weekend-label {
+  background: #eaf4ff;
+  color: #2e68ad;
+}
+
+.attendance-action-empty {
+  color: #98a2b3;
+}
+
+@media (max-width: 640px) {
+  .attendance-deadline {
+    width: 100%;
+  }
+}
+
+/* ===== 2026-07-29 refined low-saturation UI ===== */
+
+/* 入力期限：青を抑えた落ち着いたブルーグレー */
+.attendance-deadline-normal {
+  background: #f6f8fb;
+  border-color: #d7dfe9;
+  color: #53657a;
+  box-shadow: none;
+}
+
+.attendance-deadline-normal strong {
+  color: #405a78;
+}
+
+.attendance-deadline-normal .attendance-deadline-icon {
+  background: #e9eef4;
+  color: #58708c;
+}
+
+/* 締切間近：低彩度のベージュオレンジ */
+.attendance-deadline-warning {
+  background: #fbf7f1;
+  border-color: #e8d7c1;
+  color: #7a5a3d;
+  box-shadow: none;
+}
+
+.attendance-deadline-warning strong {
+  color: #8a5b31;
+}
+
+.attendance-deadline-warning .attendance-deadline-icon {
+  background: #f2e8dc;
+  color: #9a6a3f;
+}
+
+/* 締切済み：強すぎないローズグレー */
+.attendance-deadline-closed {
+  background: #fbf5f5;
+  border-color: #e8cccc;
+  color: #7d4545;
+  box-shadow: none;
+}
+
+.attendance-deadline-closed strong {
+  color: #9a4141;
+}
+
+.attendance-deadline-closed .attendance-deadline-icon {
+  background: #f2e3e3;
+  color: #a64b4b;
+}
+
+/* 勤務区分：白地＋低彩度の枠線だけで区分 */
+.attendance-work-type-control {
+  display: flex;
+  position: relative;
+}
+
+.attendance-work-type-control select {
+  background: #ffffff !important;
+  border: 1px solid #d5dbe3 !important;
+  border-radius: 9px;
+  box-shadow: none !important;
+  color: #243142 !important;
+  font-weight: 600;
+  padding-left: 14px;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease;
+  width: 100%;
+}
+
+.attendance-work-type-normal select {
+  border-color: #c7d1df !important;
+  background: #fbfcfd !important;
+}
+
+.attendance-work-type-paid-leave select {
+  border-color: #c7d9cf !important;
+  background: #fbfdfb !important;
+}
+
+.attendance-work-type-absence select {
+  border-color: #dfcaca !important;
+  background: #fdfbfb !important;
+}
+
+.attendance-work-type-holiday-work select {
+  border-color: #dfd2bf !important;
+  background: #fdfcf9 !important;
+}
+
+.attendance-work-type-control select:hover:not(:disabled) {
+  border-color: #aeb8c6 !important;
+}
+
+.attendance-work-type-control select:focus {
+  border-color: #8f9db0 !important;
+  box-shadow: 0 0 0 3px rgb(87 104 128 / 8%) !important;
+  outline: none;
+}
+
+.attendance-work-type-control select:disabled {
+  background: #f6f7f9 !important;
+  border-color: #e1e5ea !important;
+  box-shadow: none !important;
+  color: #98a2b3 !important;
+}
+
+/* 旧色ブロックは完全に非表示 */
+.attendance-work-type-swatch {
+  display: none !important;
+}
+
+
+/* ===== 2026-07-29 final refinement: low-saturation enterprise style ===== */
+
+/* 勤務区分：无点、无阴影，只用低饱和边框和极淡底色区分 */
+.attendance-work-type-control select {
+  background: #ffffff !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-radius: 8px;
+  box-shadow: none !important;
+  color: #263445 !important;
+  font-weight: 600;
+  padding-left: 14px;
+}
+
+.attendance-work-type-normal select {
+  background: #fbfcfe !important;
+  border-color: #aebed0 !important;
+}
+
+.attendance-work-type-paid-leave select {
+  background: #fbfdfb !important;
+  border-color: #abc8b5 !important;
+}
+
+.attendance-work-type-absence select {
+  background: #fefbfb !important;
+  border-color: #d4b2b2 !important;
+}
+
+.attendance-work-type-holiday-work select {
+  background: #fefcf9 !important;
+  border-color: #d3bea1 !important;
+}
+
+.attendance-work-type-control select:hover:not(:disabled) {
+  filter: brightness(0.992);
+}
+
+.attendance-work-type-normal select:hover:not(:disabled) {
+  border-color: #90a6bd !important;
+}
+
+.attendance-work-type-paid-leave select:hover:not(:disabled) {
+  border-color: #8eaf9b !important;
+}
+
+.attendance-work-type-absence select:hover:not(:disabled) {
+  border-color: #bd9696 !important;
+}
+
+.attendance-work-type-holiday-work select:hover:not(:disabled) {
+  border-color: #b9a080 !important;
+}
+
+.attendance-work-type-control select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(90 105 123 / 7%) !important;
+}
+
+.attendance-work-type-normal select:focus {
+  border-color: #8299b2 !important;
+}
+
+.attendance-work-type-paid-leave select:focus {
+  border-color: #82a58f !important;
+}
+
+.attendance-work-type-absence select:focus {
+  border-color: #b78e8e !important;
+}
+
+.attendance-work-type-holiday-work select:focus {
+  border-color: #b19676 !important;
+}
+
+.attendance-work-type-control select:disabled {
+  background: #f6f7f9 !important;
+  border-color: #e0e4e9 !important;
+  color: #98a2b3 !important;
+}
+
+/* CSV按钮：统一尺寸和视觉语言 */
+.attendance-header-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.attendance-header-actions .attendance-primary-button,
+.attendance-header-actions .attendance-secondary-button {
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: none;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: center;
+  letter-spacing: 0;
+  min-height: 40px;
+  min-width: 98px;
+  padding: 8px 16px;
+  transform: none;
+}
+
+.attendance-header-actions .attendance-secondary-button {
+  background: #ffffff;
+  border: 1px solid #cfd6df;
+  color: #435064;
+}
+
+.attendance-header-actions .attendance-secondary-button:hover:not(:disabled) {
+  background: #f7f9fb;
+  border-color: #b8c2ce;
+  box-shadow: none;
+  color: #334155;
+  transform: none;
+}
+
+.attendance-header-actions .attendance-primary-button {
+  background: #586a82;
+  border: 1px solid #586a82;
+  color: #ffffff;
+}
+
+.attendance-header-actions .attendance-primary-button:hover:not(:disabled) {
+  background: #4c5e75;
+  border-color: #4c5e75;
+  box-shadow: none;
+  transform: none;
+}
+
+.attendance-header-actions .attendance-primary-button:active:not(:disabled),
+.attendance-header-actions .attendance-secondary-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.attendance-header-actions .attendance-primary-button:focus-visible,
+.attendance-header-actions .attendance-secondary-button:focus-visible {
+  outline: 2px solid rgb(88 106 130 / 22%);
+  outline-offset: 2px;
+}
+
+.attendance-header-actions .attendance-danger-button {
+  background: #fff7f6;
+  border-color: #e7aaa5;
+  color: #a33a34;
+}
+
+.attendance-header-actions .attendance-danger-button:hover:not(:disabled) {
+  background: #fef0ee;
+  border-color: #d98f89;
+  color: #8f2f2a;
+}
+
+.attendance-header-actions .attendance-danger-button:focus-visible {
+  outline-color: rgb(180 62 54 / 22%);
+}
+
+/* ===== Weekend / holiday final adjustment ===== */
+
+/* 土曜日と日曜日の休日ラベルを曜日色に揃える */
+.attendance-holiday-label,
+.attendance-weekend-label {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 600;
+  justify-content: center;
+  line-height: 1;
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+
+.attendance-weekend-label-saturday,
+.attendance-holiday-label-saturday {
+  background: #eef4fa;
+  color: #557898;
+}
+
+.attendance-weekend-label-sunday,
+.attendance-holiday-label:not(.attendance-holiday-label-saturday) {
+  background: #fbf0f1;
+  color: #ad6268;
+}
+
+/* 土曜日は淡い青、日曜・祝日は淡い赤 */
+.attendance-saturday-row {
+  background: #f8fbfe;
+}
+
+.attendance-saturday-row:hover {
+  background: #f4f8fc !important;
+}
+
+.attendance-holiday-row {
+  background: #fffafa;
+}
+
+.attendance-holiday-row:hover {
+  background: #fdf6f6 !important;
+}
+
+.attendance-saturday-row .attendance-date-cell {
+  color: #426f99;
+}
+
+.attendance-holiday-row .attendance-date-cell {
+  color: #b05057;
+}
+
+/* 休日は前端表示専用。低彩度のニュートラル色で表示 */
+.attendance-work-type-holiday select {
+  background: #fafbfc !important;
+  border-color: #cfd7df !important;
+  color: #52606d !important;
+}
+
+.attendance-work-type-holiday select:hover:not(:disabled) {
+  border-color: #b8c3ce !important;
+}
+
+.attendance-work-type-holiday select:focus {
+  border-color: #9eacba !important;
+  box-shadow: 0 0 0 3px rgb(82 96 109 / 8%) !important;
+}
+/* 土曜日・日曜日・対象外の文字色を少し濃くする */
+.attendance-holiday-label-saturday,
+.attendance-weekend-label-saturday {
+  color: #2f6696;
+}
+
+.attendance-weekend-label-sunday,
+.attendance-status-target {
+  color: #a93f49;
+}
+/* ===== 勤怠CSV取込画面 ===== */
+
+.attendance-import-card {
+  padding: 24px;
+}
+
+.attendance-import-inner {
+  max-width: 960px;
+}
+
+.attendance-back-button {
+  gap: 7px;
+}
+
+.attendance-back-button svg {
+  fill: none;
+  height: 17px;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 17px;
+}
+
+/* 取込前の注意事項 */
+.attendance-import-warning {
+  align-items: flex-start;
+  background: #fff6df;
+  border: 1px solid #e8bd62;
+  border-radius: 12px;
+  color: #7f4b14;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 22px;
+  padding: 14px 16px;
+}
+
+.attendance-import-warning-icon {
+  align-items: center;
+  background: #f1d594;
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 800;
+  height: 26px;
+  justify-content: center;
+  width: 26px;
+}
+
+.attendance-import-warning strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.attendance-import-warning p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 入力締切済みの案内 */
+.attendance-import-closed {
+  align-items: flex-start;
+  background: #fbf5f5;
+  border: 1px solid #e8cccc;
+  border-radius: 12px;
+  color: #7d4545;
+  display: flex;
+  gap: 11px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+}
+
+.attendance-import-closed-icon {
+  align-items: center;
+  background: #f2e3e3;
+  border-radius: 50%;
+  color: #a64b4b;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.attendance-import-closed-icon svg {
+  fill: none;
+  height: 16px;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 16px;
+}
+
+.attendance-import-closed strong {
+  display: block;
+  font-size: 14px;
+}
+
+.attendance-import-closed p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 3px 0 0;
+}
+
+.attendance-import-month-field {
+  margin-bottom: 18px;
+  max-width: 240px;
+}
+
+/* CSVファイルのドラッグ＆ドロップ領域 */
+.attendance-import-dropzone {
+  align-items: center;
+  background: #fbfcfe;
+  border: 1px dashed #c7d1dd;
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  min-height: 112px;
+  padding: 18px 24px;
+  text-align: center;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.attendance-import-dropzone:hover:not(.attendance-import-dropzone-disabled) {
+  background: #f7f9fc;
+  border-color: #aebdcd;
+  box-shadow: 0 5px 16px rgb(35 54 76 / 6%);
+  transform: translateY(-1px);
+}
+
+.attendance-import-dropzone:focus-visible {
+  border-color: #91a4b8;
+  box-shadow: 0 0 0 3px rgb(91 112 136 / 10%);
+  outline: none;
+}
+
+.attendance-import-dropzone-dragging {
+  background: #f2f7fc;
+  border-color: #7f9ab5;
+  box-shadow: 0 0 0 4px rgb(91 112 136 / 8%);
+}
+
+.attendance-import-dropzone-disabled {
+  background: #f6f7f9;
+  border-color: #dfe4e9;
+  color: #98a2b3;
+  cursor: not-allowed;
+}
+
+.attendance-import-file-input {
+  display: none;
+}
+
+.attendance-import-dropzone-empty {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.attendance-import-upload-icon {
+  align-items: center;
+  background: #dcecf8;
+  border-radius: 12px;
+  color: #2f6f9f;
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+  width: 42px;
+}
+
+.attendance-import-upload-icon svg,
+.attendance-import-file-icon svg,
+.attendance-template-download svg,
+.attendance-import-error-icon svg {
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.attendance-import-upload-icon svg {
+  height: 21px;
+  stroke-width: 2.1;
+  width: 21px;
+}
+
+.attendance-import-dropzone:hover:not(.attendance-import-dropzone-disabled)
+  .attendance-import-upload-icon {
+  background: #cfe4f4;
+  color: #245f8d;
+  transform: translateY(-2px);
+}
+
+.attendance-import-dropzone-empty strong {
+  color: #344054;
+  font-size: 14px;
+}
+
+.attendance-import-dropzone-description {
+  color: #667085;
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+/* ファイル形式は選択前に確認できるよう、アップロード案内の直下に表示 */
+.attendance-import-dropzone-meta {
+  color: #7b8796;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 11px;
+  gap: 3px 14px;
+  justify-content: center;
+  margin-top: 9px;
+}
+
+.attendance-import-selected-content {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.attendance-import-file-icon {
+  align-items: center;
+  background: #edf3f8;
+  border-radius: 10px;
+  color: #58708a;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+
+.attendance-import-file-icon svg {
+  height: 20px;
+  width: 20px;
+}
+
+.attendance-import-selected-content > div {
+  min-width: 0;
+}
+
+.attendance-import-selected-content strong {
+  color: #344054;
+  display: block;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attendance-import-selected-content span:not(.attendance-import-file-icon) {
+  color: #667085;
+  font-size: 12px;
+}
+
+/* CSV項目とテンプレート */
+.attendance-import-format-help {
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 10px;
+}
+
+.attendance-import-format-help p {
+  margin: 0 0 4px;
+}
+
+.attendance-template-download {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #49617c;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 700;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.attendance-template-download:hover:not(:disabled) {
+  color: #304c6a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.attendance-template-download:disabled {
+  color: #98a2b3;
+  cursor: not-allowed;
+}
+
+.attendance-template-download svg {
+  height: 16px;
+  width: 16px;
+}
+
+.attendance-import-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.attendance-import-actions .attendance-primary-button {
+  align-items: center;
+  background: #5263b8;
+  border-color: #5263b8;
+  display: inline-flex;
+  gap: 8px;
+  justify-content: center;
+  min-width: 136px;
+}
+
+.attendance-import-actions .attendance-primary-button:hover:not(:disabled) {
+  background: #4657a5;
+  border-color: #4657a5;
+  box-shadow: 0 7px 16px rgb(70 87 165 / 20%);
+}
+
+.attendance-import-spinner {
+  animation: attendance-import-spin 0.8s linear infinite;
+  border: 2px solid rgb(255 255 255 / 45%);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  height: 14px;
+  width: 14px;
+}
+
+/* CSV取込エラー */
+.attendance-import-error-panel {
+  background: #fff8f8;
+  border: 1px solid #e9cccc;
+  border-radius: 14px;
+  color: #7f4147;
+  margin-top: 20px;
+  padding: 16px 18px;
+}
+
+.attendance-import-error-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 11px;
+}
+
+.attendance-import-error-heading strong {
+  color: #983f48;
+  display: block;
+  font-size: 14px;
+}
+
+.attendance-import-error-heading p {
+  color: #89565b;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 3px 0 0;
+}
+
+.attendance-import-error-icon {
+  align-items: center;
+  background: #f7e3e5;
+  border-radius: 50%;
+  color: #ac4d57;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.attendance-import-error-icon svg {
+  height: 16px;
+  width: 16px;
+}
+
+.attendance-import-error-items {
+  border-top: 1px solid #efd9db;
+  display: grid;
+  gap: 8px;
+  margin-top: 13px;
+  padding-top: 13px;
+}
+
+.attendance-import-error-item {
+  align-items: flex-start;
+  display: flex;
+  font-size: 13px;
+  gap: 10px;
+  line-height: 1.55;
+}
+
+.attendance-import-error-row {
+  background: #f8e8ea;
+  border-radius: 6px;
+  color: #9d4650;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 7px;
+}
+
+/* 取込成功 */
+.attendance-import-success {
+  align-items: center;
+  background: #f4faf6;
+  border: 1px solid #cde7d5;
+  border-radius: 14px;
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 15px 16px;
+}
+
+.attendance-import-success-icon {
+  align-items: center;
+  background: #e2f3e7;
+  border-radius: 50%;
+  color: #477d58;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 800;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.attendance-import-success strong {
+  color: #386747;
+  display: block;
+  font-size: 14px;
+}
+
+.attendance-import-success p {
+  color: #5f7968;
+  font-size: 12px;
+  margin: 3px 0 0;
+}
+
+.attendance-import-success .attendance-secondary-button {
+  margin-left: auto;
+}
+
+/* 取込確認ダイアログ */
+.attendance-confirm-overlay {
+  align-items: center;
+  background: rgb(15 23 42 / 38%);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 1000;
+}
+
+.attendance-confirm-dialog {
+  animation: attendance-confirm-in 0.18s ease-out;
+  background: #ffffff;
+  border: 1px solid #e2e7ed;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgb(15 23 42 / 18%);
+  max-width: 460px;
+  padding: 24px;
+  width: 100%;
+}
+
+.attendance-confirm-icon {
+  align-items: center;
+  background: #f5e7c8;
+  border-radius: 50%;
+  color: #886331;
+  display: inline-flex;
+  font-size: 15px;
+  font-weight: 800;
+  height: 36px;
+  justify-content: center;
+  width: 36px;
+}
+
+.attendance-confirm-dialog h3 {
+  color: #243142;
+  font-size: 18px;
+  margin: 14px 0 8px;
+}
+
+.attendance-confirm-dialog p {
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.attendance-confirm-emphasis {
+  color: #7d4e31 !important;
+  font-weight: 700;
+  margin-top: 12px !important;
+}
+
+.attendance-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+@keyframes attendance-import-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes attendance-confirm-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .attendance-import-card {
+    padding: 18px;
+  }
+
+  .attendance-import-dropzone {
+    padding: 18px 14px;
+  }
+
+  .attendance-import-dropzone-meta {
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .attendance-import-success {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .attendance-import-success .attendance-secondary-button {
+    margin-left: 40px;
+  }
+
+  .attendance-confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .attendance-confirm-actions button {
+    width: 100%;
+  }
+}
+
+/* ===== CSV取込成功後の操作状態 ===== */
+
+/* 取込成功後は選択ファイルを確認用の表示に切り替える */
+.attendance-import-dropzone-success {
+  background: #f7fbf8;
+  border-color: #b9d8c3;
+  cursor: default;
+  pointer-events: none;
+}
+
+.attendance-import-dropzone-success .attendance-import-file-icon {
+  background: #e8f5ec;
+  color: #4f8a63;
+}
+
+/* 選択ファイルの削除ボタン */
+.attendance-import-file-remove {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #737d8a;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 34px;
+  justify-content: center;
+  margin-left: auto;
+  padding: 0;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+  width: 34px;
+}
+
+.attendance-import-file-remove:hover:not(:disabled) {
+  background: #f1f3f5;
+  color: #4f5966;
+}
+
+.attendance-import-file-remove:focus-visible {
+  box-shadow: 0 0 0 3px rgb(91 104 119 / 13%);
+  outline: none;
+}
+
+.attendance-import-file-remove:disabled {
+  color: #c8cdd4;
+  cursor: default;
+}
+
+.attendance-import-file-remove svg {
+  fill: none;
+  height: 22px;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  width: 22px;
+}
+
+/* ===== CSV取込画面：締切案内・アップロード案内・確認ボタン ===== */
+
+/* CSV取込期限の補足説明 */
+.attendance-import-warning .attendance-import-deadline-note {
+  align-items: center;
+  color: #80551f;
+  display: flex;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.attendance-import-warning .attendance-import-deadline-note::before {
+  background: #c28a3a;
+  border-radius: 50%;
+  content: '';
+  flex: 0 0 auto;
+  height: 5px;
+  width: 5px;
+}
+
+/* 取込確認ダイアログ内の主ボタン */
+.attendance-confirm-actions .attendance-confirm-submit-button {
+  background: #5263b8;
+  border-color: #5263b8;
+  min-width: 96px;
+}
+
+.attendance-confirm-actions .attendance-confirm-submit-button:hover:not(:disabled) {
+  background: #4657a5;
+  border-color: #4657a5;
+  box-shadow: 0 7px 16px rgb(70 87 165 / 20%);
+}
+
+/* 未選択時は控えめな動きでアップロードを案内する */
+.attendance-import-dropzone-guide .attendance-import-upload-icon {
+  animation: attendance-upload-guide 2.8s ease-in-out infinite;
+}
+
+/* ドラッグ中は案内を少し強める */
+.attendance-import-dropzone-dragging .attendance-import-upload-icon {
+  animation: attendance-upload-dragging 0.9s ease-in-out infinite;
+}
+
+@keyframes attendance-upload-guide {
+  0% {
+    box-shadow: 0 0 0 0 rgb(47 111 159 / 0%);
+    transform: translateY(1px) scale(1);
+  }
+
+  45%,
+  55% {
+    box-shadow: 0 7px 16px rgb(47 111 159 / 18%);
+    transform: translateY(-6px) scale(1.05);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgb(47 111 159 / 0%);
+    transform: translateY(1px) scale(1);
+  }
+}
+
+@keyframes attendance-upload-dragging {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-5px) scale(1.03);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-import-dropzone,
+  .attendance-import-upload-icon,
+  .attendance-confirm-dialog,
+  .attendance-import-dropzone-guide .attendance-import-upload-icon,
+  .attendance-import-dropzone-dragging .attendance-import-upload-icon {
+    animation: none;
+    transition: none;
+  }
+}

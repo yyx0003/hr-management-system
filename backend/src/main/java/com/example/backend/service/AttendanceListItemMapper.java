@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -10,10 +11,13 @@ import com.example.backend.dto.attendance.AttendanceListItem;
 import com.example.backend.entity.Attendance;
 import com.example.backend.entity.Holiday;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * 勤怠データを一覧表示用DTOへ変換するクラス。
  */
 @Component
+@RequiredArgsConstructor
 public class AttendanceListItemMapper {
 
     private static final DateTimeFormatter DATE_FORMATTER =
@@ -21,6 +25,8 @@ public class AttendanceListItemMapper {
 
     private static final DateTimeFormatter TIME_FORMATTER =
             DateTimeFormatter.ofPattern("HH:mm");
+
+    private final AttendanceService attendanceService;
 
     /**
      * 勤怠データと休日データを一覧表示用DTOへ変換する。
@@ -58,7 +64,51 @@ public class AttendanceListItemMapper {
                         : holiday.getHolidayType(),
                 holiday == null
                         ? null
-                        : holiday.getHolidayName());
+                        : holiday.getHolidayName(),
+                calculateActualWorkHours(
+                        attendance,
+                        holiday));
+    }
+
+    private BigDecimal calculateActualWorkHours(
+            Attendance attendance,
+            Holiday holiday) {
+
+        if (attendance == null
+                || attendance.getAttendanceTime() == null
+                || attendance.getLeavingTime() == null) {
+            return null;
+        }
+
+        String workType = attendance.getWorkType();
+
+        if (Attendance.WorkType.PAID_LEAVE.equals(workType)
+                || Attendance.WorkType.ABSENCE.equals(workType)) {
+            return null;
+        }
+
+        if (holiday != null
+                && !Attendance.WorkType.HOLIDAY_WORK.equals(workType)) {
+            return null;
+        }
+
+        if (!Attendance.WorkType.NORMAL.equals(workType)
+                && !Attendance.WorkType.HOLIDAY_WORK.equals(workType)) {
+            return null;
+        }
+
+        var workHoursResult =
+                attendanceService.calculateWorkHours(
+                        attendance.getAttendanceTime(),
+                        attendance.getLeavingTime(),
+                        workType);
+
+        if (Attendance.WorkType.HOLIDAY_WORK.equals(workType)) {
+            return workHoursResult.getOvertimeHours();
+        }
+
+        return workHoursResult.getWorkHours()
+                .add(workHoursResult.getOvertimeHours());
     }
 
     /**
