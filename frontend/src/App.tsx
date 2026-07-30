@@ -10,6 +10,9 @@ import { AttendancePage } from './features/attendance/pages/AttendancePage'
 import { AttendanceImportPage } from './features/attendance/pages/AttendanceImportPage'
 import { CsvExportPage } from './features/attendance/pages/CsvExportPage'
 import { EmployeeListPage } from './features/employees/EmployeeListPage'
+import { EmployeeDetailPage } from './features/employees/EmployeeDetailPage'
+import { EmployeeCreatePage } from './features/employees/EmployeeCreatePage'
+import { EmployeeEditPage } from './features/employees/EmployeeEditPage'
 import './App.css'
 
 function RootRedirect() {
@@ -38,15 +41,15 @@ function App() {
             />
             <Route
               path={ROUTES.employeeNew}
-              element={<PlaceholderPage title="社員登録" />}
+              element={<EmployeeCreatePage />}
             />
             <Route
               path={ROUTES.employeeDetail}
-              element={<PlaceholderPage title="社員詳細" />}
+              element={<EmployeeDetailPage />}
             />
             <Route
               path={ROUTES.employeeEdit}
-              element={<PlaceholderPage title="社員編集" />}
+              element={<EmployeeEditPage />}
             />
 
             <Route
