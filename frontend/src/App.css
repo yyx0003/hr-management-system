@@ -207,3 +207,157 @@
     padding: 24px;
   }
 }
+
+.department-page {
+  padding: 24px;
+  border: 1px solid #999;
+  background: #fff;
+}
+
+.page-header {
+  border-bottom: 1px solid #999;
+  margin-bottom: 20px;
+}
+
+.page-header h1 {
+  margin: 0;
+  padding: 16px 0;
+  font-size: 32px;
+}
+
+.search-area {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.search-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-item label {
+  min-width: 120px;
+}
+
+.search-item input,
+.search-item select {
+  width: 240px;
+  height: 40px;
+}
+
+.content-area {
+  display: flex;
+  gap: 24px;
+}
+
+.master-panel {
+  flex: 1;
+  border: 1px solid #999;
+}
+
+.panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #999;
+  font-weight: bold;
+  background: #fafafa;
+}
+
+.panel-body {
+  padding: 16px;
+}
+
+.master-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.master-list th,
+.master-list td {
+  border: 1px solid #999;
+  padding: 12px;
+}
+
+.master-list tr:hover {
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.form-row label {
+  width: 140px;
+}
+
+.form-row input {
+  flex: 1;
+  height: 40px;
+}
+
+.button-area {
+  display: flex;
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.button-area button {
+  width: 90px;
+  height: 40px;
+}
+
+.message-area {
+  border: 1px solid #999;
+  margin-top: 24px;
+  min-height: 50px;
+  padding: 12px;
+}
+
+.master-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.master-table th,
+.master-table td {
+  border: 1px solid #bdbdbd;
+  padding: 10px;
+}
+
+.master-table th {
+  background-color: #f5f5f5;
+  text-align: center;
+  font-weight: bold;
+}
+
+.master-table td:nth-child(1) {
+  width: 60px;
+  text-align: center;
+}
+
+.master-table td:nth-child(2) {
+  width: 180px;
+}
+
+.master-table td:nth-child(4) {
+  width: 80px;
+  text-align: center;
+}
+
+.master-table tbody tr {
+  cursor: pointer;
+}
+
+.master-table tbody tr:hover {
+  background-color: #eef6ff;
+}
+
+.selected-row {
+  background-color: #dbeafe;
+}
