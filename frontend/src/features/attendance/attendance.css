@@ -1469,6 +1469,22 @@
   outline-offset: 2px;
 }
 
+.attendance-header-actions .attendance-danger-button {
+  background: #fff7f6;
+  border-color: #e7aaa5;
+  color: #a33a34;
+}
+
+.attendance-header-actions .attendance-danger-button:hover:not(:disabled) {
+  background: #fef0ee;
+  border-color: #d98f89;
+  color: #8f2f2a;
+}
+
+.attendance-header-actions .attendance-danger-button:focus-visible {
+  outline-color: rgb(180 62 54 / 22%);
+}
+
 /* ===== Weekend / holiday final adjustment ===== */
 
 /* 土曜日と日曜日の休日ラベルを曜日色に揃える */
