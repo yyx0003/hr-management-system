@@ -6,6 +6,7 @@ import type {
   AttendanceCreateRequest,
   AttendanceCsvImportResponse,
   AttendanceListResponse,
+  AttendanceMonthlyDeleteResponse,
   AttendanceUpdateRequest,
 } from './types'
 
@@ -33,6 +34,32 @@ export async function updateAttendance(
   request: AttendanceUpdateRequest,
 ): Promise<void> {
   await apiClient.put(ATTENDANCE_API.update(workDate), request)
+}
+
+export async function deleteMonthlyAttendances(
+  targetMonth: string,
+): Promise<AttendanceMonthlyDeleteResponse> {
+  const response =
+    await apiClient.delete<AttendanceMonthlyDeleteResponse>(
+      ATTENDANCE_API.list,
+      {
+        params: { targetMonth },
+      },
+    )
+
+  return response.data
+}
+
+export function getAttendanceDeleteApiErrorMessage(
+  error: unknown,
+  fallbackMessage: string,
+): string {
+  if (axios.isAxiosError<ApiErrorResponse>(error)) {
+    const responseMessage = error.response?.data?.message
+    if (responseMessage) return responseMessage
+  }
+
+  return fallbackMessage
 }
 
 export async function importAttendanceCsv(
