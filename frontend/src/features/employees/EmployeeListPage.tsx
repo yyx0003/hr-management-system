@@ -108,6 +108,15 @@ const [retireResult, setRetireResult] = useState('')
 
     navigate(ROUTES.employeeEdit.replace(':employeeNo', encodeURIComponent(selectedEmployeeNo)))
   }
+
+  const handleDetail = () => {
+    if (!selectedEmployeeNo) {
+      setSelectionError(EMPLOYEE_MESSAGES.detailSelectRequired)
+      return
+    }
+
+    navigate(ROUTES.employeeDetail.replace(':employeeNo', encodeURIComponent(selectedEmployeeNo)))
+  }
   const handleRetireeDeleteTest = async () => {
   setIsRetiring(true)
   setRetireResult('')
@@ -267,10 +276,16 @@ const [retireResult, setRetireResult] = useState('')
         </div>
         {selectionError && <p className="employee-api-message" role="alert">{selectionError}</p>}
         <div className="employee-list-actions">
-          <button className="employee-primary-button" disabled={isSearching} type="button" onClick={handleUpdate}>
+          <button className="employee-primary-button employee-list-action-button" type="button" onClick={() => navigate(ROUTES.employeeNew)}>
+            新規登録へ
+          </button>
+          <button className="employee-secondary-button employee-list-action-button employee-list-secondary-action" disabled={isSearching} type="button" onClick={handleDetail}>
+            詳細画面へ
+          </button>
+          <button className="employee-secondary-button employee-list-action-button employee-list-secondary-action" disabled={isSearching} type="button" onClick={handleUpdate}>
             更新画面へ
           </button>
-          <button className="employee-secondary-button" type="button" onClick={() => navigate(ROUTES.menu)}>
+          <button className="employee-secondary-button employee-list-back-button" type="button" onClick={() => navigate(ROUTES.menu)}>
             戻る
           </button>
         </div>
