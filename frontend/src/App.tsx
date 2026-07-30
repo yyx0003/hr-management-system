@@ -15,6 +15,10 @@ import { EmployeeCreatePage } from './features/employees/EmployeeCreatePage'
 import { EmployeeEditPage } from './features/employees/EmployeeEditPage'
 import { RetireeDeleteAdminPage } from './features/retiree/pages/RetireeDeleteAdminPage'
 import './App.css'
+import DepartmentPage from './pages/DepartmentPage'
+import PositionPage from './pages/PositionPage'
+import QualificationPage from './pages/QualificationPage'
+import SkillGradePage from './pages/SkillGradePage'
 
 function RootRedirect() {
   return (
@@ -67,22 +71,10 @@ function App() {
               element={<CsvExportPage />}
             />
 
-            <Route
-              path={ROUTES.department}
-              element={<PlaceholderPage title="部署マスタ" />}
-            />
-            <Route
-              path={ROUTES.position}
-              element={<PlaceholderPage title="役職マスタ" />}
-            />
-            <Route
-              path={ROUTES.qualification}
-              element={<PlaceholderPage title="資格マスタ" />}
-            />
-            <Route
-              path={ROUTES.skillgrade}
-              element={<PlaceholderPage title="スキル等級マスタ" />}
-            />
+            <Route path={ROUTES.department} element={<DepartmentPage/>} />
+            <Route path={ROUTES.position} element={<PositionPage />} />
+            <Route path={ROUTES.qualification} element={<QualificationPage />} />
+            <Route path={ROUTES.skillgrade} element={<SkillGradePage />} />
           </Route>
         </Route>
 

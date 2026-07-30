@@ -177,6 +177,13 @@ public class PositionService {
             throw MasterException(
                     "scr100.delete.failure");
         }
+
+        // 削除後に最も先のレコードの終了日をNULLにする
+        Position latestPosition = positionRepository.findLatestByPositionId(positionId);
+        if (latestPosition != null) {
+                latestPosition.setEndDate(null);
+                positionRepository.updateEndDate(latestPosition);
+        }
     }
 
     /** 共通例外 */

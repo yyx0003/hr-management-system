@@ -154,6 +154,12 @@ public class QualificationService {
         if (deleteCount != 1) {
             throw MasterException("scr100.delete.failure");
         }
+
+        Qualification latestQualification = qualificationRepository.findLatestByQualificationId(qualificationId);
+        if (latestQualification != null) {
+            latestQualification.setEndDate(null);
+            qualificationRepository.updateEndDate(latestQualification);
+        }
     }
 
     /** 共通の例外を返すメソッド. */
