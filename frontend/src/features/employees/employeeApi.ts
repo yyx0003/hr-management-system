@@ -1,9 +1,36 @@
 import { apiClient } from '../../lib/apiClient'
-import type { DepartmentOption, EmployeeListItem, EmployeeSearchCondition } from './types'
+import type {
+  DepartmentOption,
+  EmployeeCreateRequest,
+  EmployeeCreateResponse,
+  EmployeeDetail,
+  EmployeeListItem,
+  EmployeeSearchCondition,
+  EmployeeUpdateRequest,
+  EmployeeUpdateResponse,
+} from './types'
 
 export async function searchEmployees(condition: EmployeeSearchCondition, signal?: AbortSignal) {
   const params = toSearchParams(condition)
   const response = await apiClient.get<EmployeeListItem[]>('/api/employees', { params, signal })
+  return response.data
+}
+
+export async function fetchEmployeeDetail(employeeNo: string, signal?: AbortSignal) {
+  const response = await apiClient.get<EmployeeDetail>(`/api/employees/${encodeURIComponent(employeeNo)}`, { signal })
+  return response.data
+}
+
+export async function createEmployee(request: EmployeeCreateRequest) {
+  const response = await apiClient.post<EmployeeCreateResponse>('/api/employees', request)
+  return response.data
+}
+
+export async function updateEmployee(employeeNo: string, request: EmployeeUpdateRequest) {
+  const response = await apiClient.put<EmployeeUpdateResponse>(
+    `/api/employees/${encodeURIComponent(employeeNo)}`,
+    request,
+  )
   return response.data
 }
 
