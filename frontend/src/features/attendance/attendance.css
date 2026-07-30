@@ -95,11 +95,21 @@
 }
 
 .attendance-table input[type='time'] {
-  min-width: 112px;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  width: 180px;
 }
 
 .attendance-table select {
-  min-width: 125px;
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+
+.attendance-table .attendance-work-type-control select {
+  max-width: 100%;
+  width: 200px;
 }
 
 .attendance-month-field input:focus,
@@ -448,7 +458,7 @@
 
 .attendance-table {
   border-collapse: collapse;
-  min-width: 960px;
+  table-layout: fixed;
   width: 100%;
 }
 
@@ -458,7 +468,8 @@
   color: #475467;
   font-size: 12px;
   letter-spacing: 0.03em;
-  padding: 12px 14px;
+  padding: 12px 10px;
+  box-sizing: border-box;
   text-align: left;
   white-space: nowrap;
 }
@@ -467,8 +478,77 @@
   border-bottom: 1px solid #eef1f5;
   color: #344054;
   font-size: 14px;
-  padding: 11px 14px;
+  padding: 11px 10px;
+  box-sizing: border-box;
   vertical-align: middle;
+}
+
+.attendance-table th:nth-child(1) {
+  width: 7.5%;
+}
+
+.attendance-table th:nth-child(2) {
+  width: 7.5%;
+}
+
+.attendance-table th:nth-child(3) {
+  width: 10.5%;
+}
+
+.attendance-table th:nth-child(4) {
+  width: 17%;
+}
+
+.attendance-table th:nth-child(5),
+.attendance-table th:nth-child(6) {
+  width: 12.25%;
+}
+
+.attendance-table th:nth-child(7) {
+  width: 9%;
+}
+
+.attendance-table th:nth-child(8) {
+  width: 9.5%;
+}
+
+.attendance-table th:nth-child(9) {
+  width: 9%;
+}
+
+.attendance-table th:nth-child(7),
+.attendance-table th:nth-child(8),
+.attendance-table th:nth-child(9),
+.attendance-table td:nth-child(7),
+.attendance-table td:nth-child(8),
+.attendance-table td:nth-child(9) {
+  text-align: center;
+}
+
+.attendance-work-status {
+  box-sizing: border-box;
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 48px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+.attendance-table td:nth-child(9) .attendance-row-save-button {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.attendance-work-status-early {
+  background: #fff4e8;
+  color: #9a5415;
+}
+
+.attendance-work-status-overtime {
+  background: #f3effb;
+  color: #6941a5;
 }
 
 .attendance-table tbody tr:last-child td {

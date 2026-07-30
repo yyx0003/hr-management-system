@@ -97,6 +97,27 @@ function hasRequiredInput(row: AttendanceEditRow): boolean {
     return true
 }
 
+function getWorkStatus(
+    actualWorkHours: number | null,
+    workType: WorkType,
+): 'early' | 'overtime' | null {
+    if (actualWorkHours === null) {
+        return null
+    }
+
+    if (workType === HOLIDAY_WORK_TYPE) {
+        return actualWorkHours > 8 ? 'overtime' : null
+    }
+
+    if (workType !== 'NORMAL' || actualWorkHours === 8) {
+        return null
+    }
+
+    return actualWorkHours < 8
+        ? 'early'
+        : 'overtime'
+}
+
 function DeadlineIcon({ status }: { status: DeadlineStatus }) {
     if (status === 'closed') {
         return (
@@ -655,6 +676,7 @@ export function AttendancePage() {
                                 <th>勤務区分</th>
                                 <th>出勤時間</th>
                                 <th>退勤時間</th>
+                                <th>勤務状況</th>
                                 <th>状態</th>
                                 <th>操作</th>
                             </tr>
@@ -665,7 +687,7 @@ export function AttendancePage() {
                                 <tr>
                                     <td
                                         className="attendance-empty-cell"
-                                        colSpan={8}
+                                        colSpan={9}
                                     >
                                         読み込み中です...
                                     </td>
@@ -674,7 +696,7 @@ export function AttendancePage() {
                                 <tr>
                                     <td
                                         className="attendance-empty-cell"
-                                        colSpan={8}
+                                        colSpan={9}
                                     >
                                         表示する勤怠情報がありません。
                                     </td>
@@ -729,6 +751,12 @@ export function AttendancePage() {
                                             : row.registered
                                                 ? 'attendance-status-registered'
                                                 : 'attendance-status-unregistered'
+
+                                    const workStatus =
+                                        getWorkStatus(
+                                            row.actualWorkHours,
+                                            row.workType,
+                                        )
 
                                     const actionLabel = row.registered
                                         ? '更新'
@@ -842,7 +870,7 @@ export function AttendancePage() {
                                                 </div>
                                             </td>
 
-                                            <td>
+                                            <td className="attendance-time-cell">
                                                 <input
                                                     aria-label={`${row.workDate}の出勤時間`}
                                                     disabled={timeInputDisabled}
@@ -858,7 +886,7 @@ export function AttendancePage() {
                                                 />
                                             </td>
 
-                                            <td>
+                                            <td className="attendance-time-cell">
                                                 <input
                                                     aria-label={`${row.workDate}の退勤時間`}
                                                     disabled={timeInputDisabled}
@@ -872,6 +900,18 @@ export function AttendancePage() {
                                                         )
                                                     }
                                                 />
+                                            </td>
+
+                                            <td className="attendance-work-status-cell">
+                                                {workStatus ? (
+                                                    <span
+                                                        className={`attendance-work-status attendance-work-status-${workStatus}`}
+                                                    >
+                                                        {workStatus === 'early'
+                                                            ? '早退'
+                                                            : '残業'}
+                                                    </span>
+                                                ) : null}
                                             </td>
 
                                             <td>

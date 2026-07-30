@@ -14,6 +14,7 @@ export function toEditRow(
     workType: item.workType ?? 'NORMAL',
     holidayType: item.holidayType ?? '',
     holidayName: item.holidayName ?? '',
+    actualWorkHours: item.actualWorkHours,
     registered:
       item.attendanceTime !== null ||
       item.leavingTime !== null ||
