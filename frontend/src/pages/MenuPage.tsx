@@ -6,6 +6,7 @@ const featureLinks = [
   { label: '勤怠管理', to: ROUTES.attendances },
   { label: 'CSV出力', to: ROUTES.csvExport },
   { label: 'マスタデータ管理画面', to: ROUTES.department },
+  { label: '退職者削除', to: ROUTES.retireeDelete },
 ]
 
 export function MenuPage() {
