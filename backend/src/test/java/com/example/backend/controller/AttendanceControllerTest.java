@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -141,7 +143,8 @@ class AttendanceControllerTest {
                         "18:00",
                         "NORMAL",
                         null,
-                        null);
+                        null,
+                        new BigDecimal("9.00"));
 
         AttendanceListResponse response =
                 new AttendanceListResponse(
@@ -179,7 +182,11 @@ class AttendanceControllerTest {
                 .andExpect(
                         jsonPath(
                                 "$.attendanceList[0].workType")
-                                .value("NORMAL"));
+                                .value("NORMAL"))
+                .andExpect(
+                        jsonPath(
+                                "$.attendanceList[0].actualWorkHours")
+                                .value(9.00));
 
         verify(employeeService)
                 .getEmployeeDetail("1924");
