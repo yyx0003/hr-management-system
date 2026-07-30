@@ -1,5 +1,7 @@
 package com.example.backend.dto.attendance;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +22,6 @@ public class AttendanceListItem {
     private String holidayType;
 
     private String holidayName;
+
+    private BigDecimal actualWorkHours;
 }

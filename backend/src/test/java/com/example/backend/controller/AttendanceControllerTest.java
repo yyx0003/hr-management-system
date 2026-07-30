@@ -5,7 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -39,12 +42,14 @@ import com.example.backend.dto.attendance.AttendanceCreateRequest;
 import com.example.backend.dto.attendance.AttendanceCsvImportResponse;
 import com.example.backend.dto.attendance.AttendanceListItem;
 import com.example.backend.dto.attendance.AttendanceListResponse;
+import com.example.backend.dto.attendance.AttendanceMonthlyDeleteResponse;
 import com.example.backend.dto.attendance.AttendanceUpdateRequest;
 import com.example.backend.dto.attendance.CsvImportError;
 import com.example.backend.dto.csv.CsvFileData;
 import com.example.backend.dto.employee.EmployeeDetailDTO;
 import com.example.backend.service.AttendanceCsvExportService;
 import com.example.backend.service.AttendanceCsvImportService;
+import com.example.backend.service.AttendanceMonthlyDeleteService;
 import com.example.backend.service.AttendanceRegistrationService;
 import com.example.backend.service.AttendanceUpdateService;
 import com.example.backend.service.EmployeeService;
@@ -76,6 +81,9 @@ class AttendanceControllerTest {
     private AttendanceCsvExportService attendanceCsvExportService;
 
     @Mock
+    private AttendanceMonthlyDeleteService attendanceMonthlyDeleteService;
+
+    @Mock
     private EmployeeService employeeService;
 
     @Mock
@@ -101,6 +109,7 @@ class AttendanceControllerTest {
                 attendanceUpdateService,
                 attendanceCsvImportService,
                 attendanceCsvExportService,
+                attendanceMonthlyDeleteService,
                 employeeService,
                 messageService);
 
@@ -134,7 +143,8 @@ class AttendanceControllerTest {
                         "18:00",
                         "NORMAL",
                         null,
-                        null);
+                        null,
+                        new BigDecimal("9.00"));
 
         AttendanceListResponse response =
                 new AttendanceListResponse(
@@ -172,7 +182,11 @@ class AttendanceControllerTest {
                 .andExpect(
                         jsonPath(
                                 "$.attendanceList[0].workType")
-                                .value("NORMAL"));
+                                .value("NORMAL"))
+                .andExpect(
+                        jsonPath(
+                                "$.attendanceList[0].actualWorkHours")
+                                .value(9.00));
 
         verify(employeeService)
                 .getEmployeeDetail("1924");
@@ -790,6 +804,104 @@ class AttendanceControllerTest {
                 never())
                 .exportCsv(
                         any(),
+                        any(),
+                        any());
+    }
+
+    @Test
+    void deleteMonthlyAttendancesReturnsDeleteResult()
+            throws Exception {
+
+        when(principal.getName())
+                .thenReturn("1924");
+        when(employeeService.getEmployeeDetail("1924"))
+                .thenReturn(createEmployeeDetail());
+        when(attendanceMonthlyDeleteService
+                .deleteMonthlyAttendances(
+                        1L,
+                        YearMonth.of(2026, 7)))
+                .thenReturn(
+                        new AttendanceMonthlyDeleteResponse(
+                                21,
+                                "対象月の勤怠データを削除しました。"));
+
+        mockMvc.perform(
+                        delete("/api/attendances")
+                                .param(
+                                        "targetMonth",
+                                        "2026-07")
+                                .principal(principal))
+                .andExpect(status().isOk())
+                .andExpect(
+                        jsonPath("$.deletedCount")
+                                .value(21))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "対象月の勤怠データを削除しました。"));
+
+        verify(attendanceMonthlyDeleteService)
+                .deleteMonthlyAttendances(
+                        1L,
+                        YearMonth.of(2026, 7));
+    }
+
+    @Test
+    void deleteMonthlyAttendancesWithInvalidTargetMonthReturnsBadRequest()
+            throws Exception {
+
+        when(principal.getName())
+                .thenReturn("1924");
+        when(employeeService.getEmployeeDetail("1924"))
+                .thenReturn(createEmployeeDetail());
+        when(messageService.getMessage(
+                "error.attendance.targetMonth.invalid"))
+                .thenReturn(
+                        "対象年月の形式が正しくありません（yyyy-MM）。");
+
+        mockMvc.perform(
+                        delete("/api/attendances")
+                                .param(
+                                        "targetMonth",
+                                        "2026/07")
+                                .principal(principal))
+                .andExpect(status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(
+                                        "対象年月の形式が正しくありません（yyyy-MM）。"));
+
+        verify(
+                attendanceMonthlyDeleteService,
+                never())
+                .deleteMonthlyAttendances(
+                        any(),
+                        any());
+    }
+
+    @Test
+    void deleteMonthlyAttendancesWithoutPrincipalReturnsUnauthorized()
+            throws Exception {
+
+        when(messageService.getMessage(
+                "error.authentication.required"))
+                .thenReturn(
+                        "認証が必要です。");
+
+        mockMvc.perform(
+                        delete("/api/attendances")
+                                .param(
+                                        "targetMonth",
+                                        "2026-07"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(
+                        jsonPath("$.message")
+                                .value("認証が必要です。"));
+
+        verify(
+                attendanceMonthlyDeleteService,
+                never())
+                .deleteMonthlyAttendances(
                         any(),
                         any());
     }

@@ -8,6 +8,8 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../../constants/routes'
 import {
+    deleteMonthlyAttendances,
+    getAttendanceDeleteApiErrorMessage,
     getAttendanceApiErrorMessage,
     getMonthlyAttendances,
     registerAttendance,
@@ -95,6 +97,27 @@ function hasRequiredInput(row: AttendanceEditRow): boolean {
     return true
 }
 
+function getWorkStatus(
+    actualWorkHours: number | null,
+    workType: WorkType,
+): 'early' | 'overtime' | null {
+    if (actualWorkHours === null) {
+        return null
+    }
+
+    if (workType === HOLIDAY_WORK_TYPE) {
+        return actualWorkHours > 8 ? 'overtime' : null
+    }
+
+    if (workType !== 'NORMAL' || actualWorkHours === 8) {
+        return null
+    }
+
+    return actualWorkHours < 8
+        ? 'early'
+        : 'overtime'
+}
+
 function DeadlineIcon({ status }: { status: DeadlineStatus }) {
     if (status === 'closed') {
         return (
@@ -163,6 +186,7 @@ export function AttendancePage() {
     >({})
     const [loading, setLoading] = useState(false)
     const [savingDate, setSavingDate] = useState<string | null>(null)
+    const [deleting, setDeleting] = useState(false)
     const [message, setMessage] = useState('')
     const [errorMessage, setErrorMessage] = useState('')
 
@@ -391,6 +415,40 @@ export function AttendancePage() {
         event: ChangeEvent<HTMLInputElement>,
     ) => {
         setTargetMonth(event.target.value)
+        setMessage('')
+        setErrorMessage('')
+    }
+
+    const handleMonthlyDelete = async () => {
+        if (deleting || isClosed) return
+
+        const confirmed = window.confirm(
+            `${formatTargetMonth(targetMonth)}の勤怠データをすべて削除します。\n`
+            + 'この操作は元に戻せません。よろしいですか？',
+        )
+
+        if (!confirmed) return
+
+        setDeleting(true)
+        setMessage('')
+        setErrorMessage('')
+
+        try {
+            const response =
+                await deleteMonthlyAttendances(targetMonth)
+
+            await loadAttendances()
+            setMessage(response.message)
+        } catch (error: unknown) {
+            setErrorMessage(
+                getAttendanceDeleteApiErrorMessage(
+                    error,
+                    ATTENDANCE_MESSAGES.monthlyDeleteFailed,
+                ),
+            )
+        } finally {
+            setDeleting(false)
+        }
     }
 
     return (
@@ -406,9 +464,26 @@ export function AttendancePage() {
 
                 <div className="attendance-header-actions">
                     <button
+                        className="attendance-secondary-button attendance-danger-button"
+                        type="button"
+                        disabled={
+                            isClosed
+                            || deleting
+                            || loading
+                            || savingDate !== null
+                            || !targetMonth
+                        }
+                        onClick={() => void handleMonthlyDelete()}
+                    >
+                        {deleting
+                            ? '削除中...'
+                            : '対象月データを削除'}
+                    </button>
+
+                    <button
                         className="attendance-secondary-button"
                         type="button"
-                        disabled={isClosed}
+                        disabled={isClosed || deleting}
                         onClick={() => navigate(ROUTES.attendanceImport)}
                     >
                         <svg
@@ -434,6 +509,7 @@ export function AttendancePage() {
                         aria-label="前月"
                         className="attendance-month-button"
                         type="button"
+                        disabled={deleting}
                         onClick={() =>
                             setTargetMonth((current) =>
                                 changeMonth(current, -1)
@@ -449,6 +525,7 @@ export function AttendancePage() {
                         <input
                             type="month"
                             value={targetMonth}
+                            disabled={deleting}
                             onChange={handleMonthChange}
                         />
                     </label>
@@ -457,6 +534,7 @@ export function AttendancePage() {
                         aria-label="翌月"
                         className="attendance-month-button"
                         type="button"
+                        disabled={deleting}
                         onClick={() =>
                             setTargetMonth((current) =>
                                 changeMonth(current, 1)
@@ -469,7 +547,7 @@ export function AttendancePage() {
                     <button
                         className="attendance-secondary-button"
                         type="button"
-                        disabled={loading}
+                        disabled={loading || deleting}
                         onClick={() => void loadAttendances()}
                     >
                         ↻ 再読込
@@ -598,6 +676,7 @@ export function AttendancePage() {
                                 <th>勤務区分</th>
                                 <th>出勤時間</th>
                                 <th>退勤時間</th>
+                                <th>勤務状況</th>
                                 <th>状態</th>
                                 <th>操作</th>
                             </tr>
@@ -608,7 +687,7 @@ export function AttendancePage() {
                                 <tr>
                                     <td
                                         className="attendance-empty-cell"
-                                        colSpan={8}
+                                        colSpan={9}
                                     >
                                         読み込み中です...
                                     </td>
@@ -617,7 +696,7 @@ export function AttendancePage() {
                                 <tr>
                                     <td
                                         className="attendance-empty-cell"
-                                        colSpan={8}
+                                        colSpan={9}
                                     >
                                         表示する勤怠情報がありません。
                                     </td>
@@ -672,6 +751,12 @@ export function AttendancePage() {
                                             : row.registered
                                                 ? 'attendance-status-registered'
                                                 : 'attendance-status-unregistered'
+
+                                    const workStatus =
+                                        getWorkStatus(
+                                            row.actualWorkHours,
+                                            row.workType,
+                                        )
 
                                     const actionLabel = row.registered
                                         ? '更新'
@@ -785,7 +870,7 @@ export function AttendancePage() {
                                                 </div>
                                             </td>
 
-                                            <td>
+                                            <td className="attendance-time-cell">
                                                 <input
                                                     aria-label={`${row.workDate}の出勤時間`}
                                                     disabled={timeInputDisabled}
@@ -801,7 +886,7 @@ export function AttendancePage() {
                                                 />
                                             </td>
 
-                                            <td>
+                                            <td className="attendance-time-cell">
                                                 <input
                                                     aria-label={`${row.workDate}の退勤時間`}
                                                     disabled={timeInputDisabled}
@@ -815,6 +900,18 @@ export function AttendancePage() {
                                                         )
                                                     }
                                                 />
+                                            </td>
+
+                                            <td className="attendance-work-status-cell">
+                                                {workStatus ? (
+                                                    <span
+                                                        className={`attendance-work-status attendance-work-status-${workStatus}`}
+                                                    >
+                                                        {workStatus === 'early'
+                                                            ? '早退'
+                                                            : '残業'}
+                                                    </span>
+                                                ) : null}
                                             </td>
 
                                             <td>

@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.example.backend.common.MessageService;
 import com.example.backend.dto.attendance.AttendanceListItem;
 import com.example.backend.dto.attendance.AttendanceListResponse;
 import com.example.backend.entity.Attendance;
@@ -43,7 +46,9 @@ class MonthlyAttendanceListServiceTest {
                         attendanceRepository,
                         holidayRepository,
                         new MonthlyDateService(),
-                        new AttendanceListItemMapper());
+                        new AttendanceListItemMapper(
+                                new AttendanceService(
+                                        mock(MessageService.class))));
     }
 
     @Test
@@ -159,6 +164,10 @@ class MonthlyAttendanceListServiceTest {
         assertEquals(
                 Attendance.WorkType.NORMAL,
                 item.getWorkType());
+
+        assertEquals(
+                new BigDecimal("9.00"),
+                item.getActualWorkHours());
 
         assertNull(item.getHolidayType());
         assertNull(item.getHolidayName());

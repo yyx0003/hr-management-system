@@ -3,13 +3,16 @@ package com.example.backend.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.example.backend.common.MessageService;
 import com.example.backend.dto.attendance.AttendanceListItem;
 import com.example.backend.entity.Attendance;
 import com.example.backend.entity.Holiday;
@@ -20,7 +23,10 @@ class AttendanceListItemMapperTest {
 
     @BeforeEach
     void setUp() {
-        mapper = new AttendanceListItemMapper();
+        mapper =
+                new AttendanceListItemMapper(
+                        new AttendanceService(
+                                mock(MessageService.class)));
     }
 
     @Test
@@ -69,6 +75,8 @@ class AttendanceListItemMapperTest {
         assertEquals(
                 "海の日",
                 result.getHolidayName());
+
+        assertNull(result.getActualWorkHours());
     }
 
     @Test
@@ -107,6 +115,10 @@ class AttendanceListItemMapperTest {
 
         assertNull(result.getHolidayType());
         assertNull(result.getHolidayName());
+
+        assertEquals(
+                new BigDecimal("8.75"),
+                result.getActualWorkHours());
     }
 
     @Test
@@ -172,6 +184,8 @@ class AttendanceListItemMapperTest {
         assertEquals(
                 Attendance.WorkType.PAID_LEAVE,
                 result.getWorkType());
+
+        assertNull(result.getActualWorkHours());
     }
 
     @Test
@@ -195,6 +209,57 @@ class AttendanceListItemMapperTest {
         assertNull(result.getWorkType());
         assertNull(result.getHolidayType());
         assertNull(result.getHolidayName());
+        assertNull(result.getActualWorkHours());
+    }
+
+    @Test
+    void holidayWorkUsesOvertimeHoursAsActualWorkHours() {
+
+        LocalDate workDate =
+                LocalDate.of(2026, 7, 26);
+
+        Attendance attendance = new Attendance();
+        attendance.setWorkDate(workDate);
+        attendance.setAttendanceTime(LocalTime.of(9, 0));
+        attendance.setLeavingTime(LocalTime.of(17, 30));
+        attendance.setWorkType(
+                Attendance.WorkType.HOLIDAY_WORK);
+
+        Holiday holiday = new Holiday();
+        holiday.setHolidayDate(workDate);
+        holiday.setHolidayType("WEEKEND");
+        holiday.setHolidayName("日曜日");
+
+        AttendanceListItem result =
+                mapper.toListItem(
+                        workDate,
+                        attendance,
+                        holiday);
+
+        assertEquals(
+                new BigDecimal("8.50"),
+                result.getActualWorkHours());
+    }
+
+    @Test
+    void incompleteWorkTimesHaveNoActualWorkHours() {
+
+        LocalDate workDate =
+                LocalDate.of(2026, 7, 27);
+
+        Attendance attendance = new Attendance();
+        attendance.setWorkDate(workDate);
+        attendance.setAttendanceTime(LocalTime.of(9, 0));
+        attendance.setLeavingTime(null);
+        attendance.setWorkType(Attendance.WorkType.NORMAL);
+
+        AttendanceListItem result =
+                mapper.toListItem(
+                        workDate,
+                        attendance,
+                        null);
+
+        assertNull(result.getActualWorkHours());
     }
 
     @Test

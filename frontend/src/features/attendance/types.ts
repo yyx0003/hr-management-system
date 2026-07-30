@@ -11,6 +11,7 @@ export interface AttendanceListItem {
   workType: WorkType | null
   holidayType: string | null
   holidayName: string | null
+  actualWorkHours: number | null
 }
 
 export interface AttendanceListResponse {
@@ -29,6 +30,11 @@ export interface AttendanceUpdateRequest {
   attendanceTime: string | null
   leavingTime: string | null
   workType: WorkType
+}
+
+export interface AttendanceMonthlyDeleteResponse {
+  deletedCount: number
+  message: string
 }
 
 export interface CsvImportError {
@@ -55,5 +61,6 @@ export interface AttendanceEditRow {
   workType: WorkType
   holidayType: string
   holidayName: string
+  actualWorkHours: number | null
   registered: boolean
 }
