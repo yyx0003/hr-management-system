@@ -11,8 +11,12 @@ export const ATTENDANCE_MESSAGES = {
   csvImportSuccess: 'CSVファイルの取込が完了しました。',
   csvImportFailed: 'CSVファイルの取込に失敗しました。',
   csvImportValidationFailed: 'CSVの内容にエラーがあります。',
-  csvExportFailed: 'CSVファイルの出力に失敗しました。',
+  hrCsvExportSuccess: '人事用CSVを出力しました。',
+  managementCsvExportSuccess: '経営用CSVを出力しました。',
+  csvExportFailed:
+    'CSVファイルの出力に失敗しました。\n時間をおいて再度お試しください。',
   targetMonthRequired: '対象年月を選択してください。',
+  targetMonthInvalid: '対象年月を正しく入力してください。',
   timeRequired: '出勤時刻と退勤時刻を入力してください。',
   timeNotAllowed:
     '有給または欠勤の場合、出勤時刻と退勤時刻は入力できません。',

@@ -3,6 +3,13 @@ import {
   CSV_EXPORT_TYPE,
   type CsvExportType,
 } from '../constants'
+import {
+  exportHrCsv,
+  exportManagementCsv,
+  getCsvExportApiErrorMessage,
+  type DownloadedCsv,
+} from '../api'
+import { ATTENDANCE_MESSAGES } from '../messages'
 import { getCurrentMonth } from '../utils'
 import '../attendance.css'
 
@@ -29,6 +36,7 @@ export function CsvExportPage() {
   const [targetMonth, setTargetMonth] = useState(getCurrentMonth())
   const [exporting, setExporting] = useState(false)
   const [noticeMessage, setNoticeMessage] = useState('')
+  const [exportFailed, setExportFailed] = useState(false)
 
   const exportDetails = EXPORT_DETAILS[exportType]
   const targetMonthToken = targetMonth.replace('-', '')
@@ -39,19 +47,48 @@ export function CsvExportPage() {
   const selectExportType = (nextType: CsvExportType) => {
     setExportType(nextType)
     setNoticeMessage('')
+    setExportFailed(false)
   }
 
   const handleExport = async () => {
     if (exporting) return
+    if (!targetMonth) {
+      setNoticeMessage(ATTENDANCE_MESSAGES.targetMonthRequired)
+      setExportFailed(true)
+      return
+    }
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(targetMonth)) {
+      setNoticeMessage(ATTENDANCE_MESSAGES.targetMonthInvalid)
+      setExportFailed(true)
+      return
+    }
 
     setExporting(true)
     setNoticeMessage('')
+    setExportFailed(false)
 
-    // API接続までは画面状態のみ確認する。
-    await new Promise((resolve) => window.setTimeout(resolve, 500))
+    try {
+      const downloadedCsv =
+        exportType === CSV_EXPORT_TYPE.hr
+          ? await exportHrCsv(targetMonth)
+          : await exportManagementCsv(targetMonth)
 
-    setNoticeMessage('この機能は現在準備中です。')
-    setExporting(false)
+      downloadCsv(downloadedCsv)
+      setNoticeMessage(
+        exportType === CSV_EXPORT_TYPE.hr
+          ? ATTENDANCE_MESSAGES.hrCsvExportSuccess
+          : ATTENDANCE_MESSAGES.managementCsvExportSuccess,
+      )
+    } catch (error) {
+      const responseMessage =
+        await getCsvExportApiErrorMessage(error)
+      setNoticeMessage(
+        responseMessage || ATTENDANCE_MESSAGES.csvExportFailed,
+      )
+      setExportFailed(true)
+    } finally {
+      setExporting(false)
+    }
   }
 
   return (
@@ -120,6 +157,7 @@ export function CsvExportPage() {
                 onChange={(event) => {
                   setTargetMonth(event.target.value)
                   setNoticeMessage('')
+                  setExportFailed(false)
                 }}
               />
             </label>
@@ -141,7 +179,7 @@ export function CsvExportPage() {
                 <div className="attendance-import-actions attendance-export-actions">
                   <button
                     className="attendance-primary-button attendance-export-button"
-                    disabled={exporting || !targetMonth}
+                    disabled={exporting}
                     type="button"
                     onClick={() => void handleExport()}
                   >
@@ -169,7 +207,10 @@ export function CsvExportPage() {
               </div>
 
               {noticeMessage && (
-                <div className="attendance-export-notice" role="status">
+                <div
+                  className="attendance-export-notice"
+                  role={exportFailed ? 'alert' : 'status'}
+                >
                   {noticeMessage}
                 </div>
               )}
@@ -179,6 +220,19 @@ export function CsvExportPage() {
       </section>
     </div>
   )
+}
+
+function downloadCsv({ blob, fileName }: DownloadedCsv): void {
+  const blobUrl = window.URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+
+  anchor.href = blobUrl
+  anchor.download = fileName
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+
+  window.URL.revokeObjectURL(blobUrl)
 }
 
 function formatTargetMonth(targetMonth: string): string {

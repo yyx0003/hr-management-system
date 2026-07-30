@@ -6,10 +6,8 @@ export const ATTENDANCE_API = {
   update: (workDate: string) =>
     `/api/attendances/${encodeURIComponent(workDate)}`,
   csvImport: '/api/attendances/csv-import',
-
-  // 人事向け・経営向けCSVの正式なURLが決まったらここだけ変更する。
-  hrCsvExport: '/api/csv-export/hr',
-  managementCsvExport: '/api/csv-export/management',
+  hrCsvExport: '/api/csv/hr/export',
+  managementCsvExport: '/api/csv/management/export',
 } as const
 
 export const WORK_TYPE_OPTIONS: Array<{

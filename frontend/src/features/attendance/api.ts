@@ -53,45 +53,49 @@ export async function importAttendanceCsv(
   return response.data
 }
 
-export async function exportHrCsv(targetMonth: string): Promise<void> {
-  await downloadCsv(ATTENDANCE_API.hrCsvExport, targetMonth, '人事向け.csv')
+export async function exportHrCsv(
+  targetMonth: string,
+): Promise<DownloadedCsv> {
+  return requestCsvExport(
+    ATTENDANCE_API.hrCsvExport,
+    targetMonth,
+    `人事向け_勤怠給与_${targetMonth.replace('-', '')}.csv`,
+  )
 }
 
 export async function exportManagementCsv(
   targetMonth: string,
-): Promise<void> {
-  await downloadCsv(
+): Promise<DownloadedCsv> {
+  return requestCsvExport(
     ATTENDANCE_API.managementCsvExport,
     targetMonth,
-    '経営向け.csv',
+    `経営向け_部署別集計_${targetMonth.replace('-', '')}.csv`,
   )
 }
 
-async function downloadCsv(
+export interface DownloadedCsv {
+  blob: Blob
+  fileName: string
+}
+
+async function requestCsvExport(
   url: string,
   targetMonth: string,
-  defaultFileName: string,
-): Promise<void> {
-  const response = await apiClient.get<Blob>(url, {
-    params: { targetMonth },
+  fallbackFileName: string,
+): Promise<DownloadedCsv> {
+  const response = await apiClient.post<Blob>(url, { targetMonth }, {
     responseType: 'blob',
   })
 
   const fileName =
     getFileNameFromContentDisposition(
       response.headers['content-disposition'],
-    ) || `${targetMonth}_${defaultFileName}`
+    ) || fallbackFileName
 
-  const blobUrl = window.URL.createObjectURL(response.data)
-  const anchor = document.createElement('a')
-
-  anchor.href = blobUrl
-  anchor.download = fileName
-  document.body.appendChild(anchor)
-  anchor.click()
-  anchor.remove()
-
-  window.URL.revokeObjectURL(blobUrl)
+  return {
+    blob: response.data,
+    fileName,
+  }
 }
 
 function getFileNameFromContentDisposition(
@@ -104,7 +108,11 @@ function getFileNameFromContentDisposition(
   )
 
   if (utf8Match?.[1]) {
-    return decodeURIComponent(utf8Match[1])
+    try {
+      return decodeURIComponent(utf8Match[1])
+    } catch {
+      // 不正なfilename*の場合は下の通常形式、または動的な予備名を使用する。
+    }
   }
 
   const normalMatch = contentDisposition.match(
@@ -112,6 +120,60 @@ function getFileNameFromContentDisposition(
   )
 
   return normalMatch?.[1] ?? null
+}
+
+export async function getCsvExportApiErrorMessage(
+  error: unknown,
+): Promise<string | null> {
+  if (!axios.isAxiosError<ApiErrorResponse | Blob>(error)) {
+    return null
+  }
+
+  const responseData = error.response?.data
+
+  if (responseData instanceof Blob) {
+    return getMessageFromErrorBlob(responseData)
+  }
+
+  if (
+    responseData &&
+    typeof responseData === 'object' &&
+    'message' in responseData &&
+    typeof responseData.message === 'string'
+  ) {
+    return responseData.message
+  }
+
+  return null
+}
+
+async function getMessageFromErrorBlob(
+  errorBlob: Blob,
+): Promise<string | null> {
+  let text: string
+  try {
+    text = await errorBlob.text()
+  } catch {
+    return null
+  }
+
+  if (!text) return null
+
+  try {
+    const response: unknown = JSON.parse(text)
+    if (
+      response &&
+      typeof response === 'object' &&
+      'message' in response &&
+      typeof response.message === 'string'
+    ) {
+      return response.message
+    }
+  } catch {
+    // JSON以外のエラーレスポンスは共通の予備メッセージへ委ねる。
+  }
+
+  return null
 }
 
 export function getAttendanceApiErrorMessage(
