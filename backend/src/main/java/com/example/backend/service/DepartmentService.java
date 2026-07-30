@@ -62,9 +62,13 @@ public class DepartmentService {
     public Department updateDepartment(
             Long departmentId, LocalDate startDate, String departmentName) {
 
+        // 新規履歴の開始日が月初でなければ例外を返す
+        if (startDate.getDayOfMonth() != 1) {
+            throw MasterException("scr100.startDate.dayMustBeFirst");
+        }
         // 現時点で最も開始日が先の部署レコードを取得し、開始日を切り替え日の前日に設定
         Department latestDepartment = departmentRepository.findLatestByDepartmentId(departmentId);
-        //廃止予定の場合は変更不可にし、例外を返す
+        // 廃止予定の場合は変更不可にし、例外を返す
         if (latestDepartment.getEndDate() != null) {
             throw MasterException("scr100.delete.tobeInvalid");
         } else if (!latestDepartment.getStartDate().isBefore(startDate)) {
@@ -91,6 +95,12 @@ public class DepartmentService {
     public Department createDepartment(
             String departmentName,
             LocalDate startDate) {
+
+        // 新規部署の開始日が月初でなければ例外を返す
+        if (startDate.getDayOfMonth() != 1) {
+            throw MasterException("scr100.startDate.dayMustBeFirst");
+        }
+
         // 部署IDの最大値を取得し、最大値 + 1を設定して保存
         Department newDepartment = new Department();
         Long maxId = departmentRepository.findMaxId();
@@ -119,12 +129,24 @@ public class DepartmentService {
         // 削除対象取得.
         Department department = departmentRepository.findEffectiveAt(departmentId, startDate);
         if (department.getStartDate().isBefore(LocalDate.now())
-            || department.getStartDate().isEqual(LocalDate.now())) {
-                throw MasterException("scr100.delete.historyNotAllowed");
+                || department.getStartDate().isEqual(LocalDate.now())) {
+            throw MasterException("scr100.delete.historyNotAllowed");
         } else if (department.getEndDate() != null) {
             throw MasterException("scr100.delete.hasNext");
         }
-        departmentRepository.deleteDepartment(department);
+
+        int deleteCount = departmentRepository.deleteDepartment(department);
+        if (deleteCount != 1) {
+            throw MasterException(
+                    "scr100.delete.failure");
+        }
+
+        // 削除後、開始日が最も先のレコードの終了日をNULLに設定する
+        Department latestDepartment = departmentRepository.findLatestByDepartmentId(departmentId);
+        if (latestDepartment != null) {
+            latestDepartment.setEndDate(null);
+            departmentRepository.updateEndDate(latestDepartment);
+        }
     }
 
     /** 共通の例外を返すメソッド. */

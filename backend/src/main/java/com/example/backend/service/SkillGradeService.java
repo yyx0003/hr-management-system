@@ -132,6 +132,13 @@ public class SkillGradeService {
                         throw MasterException(
                                         "scr100.delete.failure");
                 }
+
+                SkillGrade latestSkillGrade = skillGradeRepository.findLatestBySkillGrade(skillGrade);
+
+                if (latestSkillGrade != null) {
+                        latestSkillGrade.setEndDate(null);
+                        skillGradeRepository.updateEndDate(latestSkillGrade);
+                }
         }
 
         /** 共通例外 */
