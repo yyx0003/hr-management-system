@@ -23,6 +23,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.backend.dto.qualification.CreateQualificationRequest;
 import com.example.backend.dto.qualification.UpdateQualificationRequest;
 import com.example.backend.entity.Qualification;
@@ -238,9 +239,9 @@ class QualificationIntegrationTest {
                 .andExpect(status().isOk());
 
         Qualification result =
-                qualificationRepository.findEffectiveAt(
-                        4L,
-                        LocalDate.of(2026, 11, 1));
+                qualificationRepository.selectOne(Wrappers.lambdaQuery(Qualification.class)
+                        .eq(Qualification::getQualificationId, 4L)
+                        .eq(Qualification::getStartDate, LocalDate.of(2026,11,1)));
 
         assertThat(result)
                 .isNull();

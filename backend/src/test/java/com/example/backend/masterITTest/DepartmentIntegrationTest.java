@@ -24,6 +24,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.backend.dto.department.CreateDepartmentRequest;
 import com.example.backend.dto.department.UpdateDepartmentRequest;
 import com.example.backend.entity.Department;
@@ -184,14 +185,14 @@ class DepartmentIntegrationTest {
     @Test
     @DisplayName("部署履歴削除")
     void deleteDepartmentTest1() throws Exception {
-
         mockMvc.perform(delete("/department/{departmentId}/{startDate}", 4L, "2026-11-01"))
                 .andExpect(status().isOk());
 
-        Department result = departmentRepository.findEffectiveAt(
-                4L,
-                LocalDate.of(2026, 11, 1));
-
+        Department result = departmentRepository.selectOne(
+                Wrappers.lambdaQuery(Department.class).eq(Department::getDepartmentId, 4L)
+                .eq(Department::getStartDate, LocalDate.of(2026,11,1))       
+        );
+        
         assertThat(result)
                 .isNull();
     }

@@ -23,6 +23,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.backend.dto.position.CreatePositionRequest;
 import com.example.backend.dto.position.UpdatePositionRequest;
 import com.example.backend.entity.Position;
@@ -227,9 +228,9 @@ class PositionIntegrationTest {
                 .andExpect(status().isOk());
 
         Position result =
-                positionRepository.findEffectiveAt(
-                        4L,
-                        LocalDate.of(2026, 11, 1));
+                positionRepository.selectOne(Wrappers.lambdaQuery(Position.class)
+                        .eq(Position::getPositionId, 4L)
+                        .eq(Position::getStartDate, LocalDate.of(2026,11,1)));
 
         assertThat(result)
                 .isNull();
