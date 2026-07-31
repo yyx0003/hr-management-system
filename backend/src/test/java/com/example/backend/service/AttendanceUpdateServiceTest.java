@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,12 +16,12 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.backend.common.MessageService;
 import com.example.backend.common.exception.BusinessException;
 import com.example.backend.dto.attendance.AttendanceUpdateRequest;
@@ -105,8 +106,8 @@ class AttendanceUpdateServiceTest {
 
         verify(attendanceRepository)
                 .update(
-                        any(Attendance.class),
-                        any(LambdaQueryWrapper.class));
+                        isNull(),
+                        any(UpdateWrapper.class));
 
         assertEquals(
                 LocalTime.of(8, 30),
@@ -207,8 +208,8 @@ class AttendanceUpdateServiceTest {
 
         verify(attendanceRepository, never())
                 .update(
-                        any(Attendance.class),
-                        any(LambdaQueryWrapper.class));
+                        isNull(),
+                        any(UpdateWrapper.class));
     }
 
     @Test
@@ -303,8 +304,8 @@ class AttendanceUpdateServiceTest {
 
         verify(attendanceRepository, never())
                 .update(
-                        any(Attendance.class),
-                        any(LambdaQueryWrapper.class));
+                        isNull(),
+                        any(UpdateWrapper.class));
     }
 
     @Test
@@ -339,12 +340,12 @@ class AttendanceUpdateServiceTest {
 
         verify(attendanceRepository, never())
                 .update(
-                        any(Attendance.class),
-                        any(LambdaQueryWrapper.class));
+                        isNull(),
+                        any(UpdateWrapper.class));
     }
 
     @Test
-    void updatedEntityIsPassedToRepository() {
+    void updatedEntityIsReturnedWhenExplicitUpdateWrapperIsUsed() {
 
         Long employeeId = 10L;
         LocalDate workDate =
@@ -368,22 +369,16 @@ class AttendanceUpdateServiceTest {
                 any(LambdaQueryWrapper.class)))
                 .thenReturn(existing);
 
-        service.update(
+        Attendance updated =
+                service.update(
                 employeeId,
                 workDate,
                 request);
 
-        ArgumentCaptor<Attendance> captor =
-                ArgumentCaptor.forClass(
-                        Attendance.class);
-
         verify(attendanceRepository)
                 .update(
-                        captor.capture(),
-                        any(LambdaQueryWrapper.class));
-
-        Attendance updated =
-                captor.getValue();
+                        isNull(),
+                        any(UpdateWrapper.class));
 
         assertEquals(10L, updated.getEmployeeId());
 
