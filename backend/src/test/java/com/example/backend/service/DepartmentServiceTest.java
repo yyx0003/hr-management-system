@@ -268,6 +268,8 @@ class DepartmentServiceTest {
                 any()))
                         .thenReturn(department);
 
+        when(departmentRepository.deleteDepartment(any()))
+                .thenReturn(1);
         departmentService.deleteDepartment(
                 1L,
                 department.getStartDate());

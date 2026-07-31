@@ -23,6 +23,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.backend.dto.skillgrade.UpdateSkillGradeRequest;
 import com.example.backend.entity.SkillGrade;
 import com.example.backend.repository.SkillGradeRepository;
@@ -188,9 +189,9 @@ class SkillGradeIntegrationTest {
                 .andExpect(status().isOk());
 
         SkillGrade result =
-                skillGradeRepository.findEffectiveAt(
-                        2,
-                        LocalDate.of(2026, 9, 1));
+                skillGradeRepository.selectOne(Wrappers.<SkillGrade>lambdaQuery()
+                        .eq(SkillGrade::getSkillGrade, 2)
+                        .eq(SkillGrade::getStartDate, LocalDate.of(2026, 9, 1)));
 
         assertThat(result)
                 .isNull();
