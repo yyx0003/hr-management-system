@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.backend.common.MessageService;
 import com.example.backend.common.exception.BusinessException;
 import com.example.backend.dto.attendance.AttendanceUpdateRequest;
@@ -78,14 +80,34 @@ private final SalaryResultTransactionHelper salaryResultTransactionHelper;
         attendance.setLeavingTime(leavingTime);
         attendance.setWorkType(request.getWorkType());
 
-        LambdaQueryWrapper<Attendance> updateCondition =
-                createCondition(
-                        employeeId,
-                        workDate);
+        LocalDateTime updatedAt =
+                LocalDateTime.now();
+        attendance.setUpdatedAt(updatedAt);
 
-       attendanceRepository.update(
-        attendance,
-        updateCondition);
+        UpdateWrapper<Attendance> updateCondition =
+                new UpdateWrapper<Attendance>()
+                        .eq(
+                                "employee_id",
+                                employeeId)
+                        .eq(
+                                "work_date",
+                                workDate)
+                        .set(
+                                "attendance_time",
+                                attendanceTime)
+                        .set(
+                                "leaving_time",
+                                leavingTime)
+                        .set(
+                                "work_type",
+                                request.getWorkType())
+                        .set(
+                                "updated_at",
+                                updatedAt);
+
+        attendanceRepository.update(
+                null,
+                updateCondition);
 
 if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
             org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
