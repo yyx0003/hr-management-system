@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /**
  * 職能資格管理ページ
  */
@@ -41,10 +42,6 @@ export default function SkillGradePage() {
     const [message, setMessage]
         = useState('');
 
-    useEffect(() => {
-        loadSkillGrades();
-    }, []);
-
     const loadSkillGrades = async () => {
         try {
             const data = await skillGradeApi.findAll();
@@ -58,6 +55,10 @@ export default function SkillGradePage() {
             );
         }
     };
+    
+    useEffect(() => {
+        loadSkillGrades();
+    }, []);
 
     const filteredSkillGrades =
         useMemo(() => {

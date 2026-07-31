@@ -1,11 +1,11 @@
-type Column = {
+type Column<T> = {
     header: string;
-    render: (row: any) => React.ReactNode;
+    render: (row: T) => React.ReactNode;
 };
 
 type Props<T> = {
     rows: T[];
-    columns: Column[];
+    columns: Column<T>[];
     onSelect: (row: T) => void;
     selected?: T | null;
 };

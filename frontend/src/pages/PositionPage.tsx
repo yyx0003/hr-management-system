@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /**
  * 役職管理ページ
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { positionApi } from '../features/master/masterApi';
@@ -55,11 +56,7 @@ export default function PositionPage() {
 
     const [isCreateMode, setIsCreateMode] = useState(false);
 
-    useEffect(() => {
-        loadPositions();
-    }, []);
-
-    const loadPositions = async () => {
+    const loadPositions = useCallback(async () => {
         try {
             const data = await positionApi.findAll();
             setPositions(data);
@@ -71,7 +68,11 @@ export default function PositionPage() {
                     : MASTER_MESSAGES.dataFetchFailed
             );
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        loadPositions();
+    }, [loadPositions]);
 
     const filteredPositions =
         useMemo(() => {
