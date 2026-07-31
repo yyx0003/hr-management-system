@@ -4,6 +4,11 @@
  * @param endDate 終了日
  * @returns 削除可否
  */
+
+type HistoryItem = {
+    startDate: string;
+};
+
 export const canDeleteHistory = (
     startDate: string,
     endDate: string | null,
@@ -42,13 +47,13 @@ export const isActiveHistory = (
 };
 
 /**
- * ID降順 → 開始日降順でソート
+ * ID降順 → 開始日昇順でソート
  *
  * @param items 対象データ
  * @param idGetter ID取得関数
  * 
  */
-export const sortMasterHistory = <T>(
+export const sortMasterHistory = <T extends HistoryItem>(
     items: T[],
     idGetter: (item: T) => number,
 ): T[] => {
@@ -63,13 +68,9 @@ export const sortMasterHistory = <T>(
         }
 
         return (
-            new Date(
-                (a as any).startDate,
-            ).getTime()
+            new Date(a.startDate).getTime()
             -
-            new Date(
-                (b as any).startDate,
-            ).getTime()
+            new Date(b.startDate).getTime()
         );
     });
 };

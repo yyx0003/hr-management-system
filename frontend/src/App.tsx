@@ -1,6 +1,5 @@
 ﻿import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { PlaceholderPage } from './components/PlaceholderPage'
 import { MenuPage } from './pages/MenuPage'
 import { LoginPage } from './pages/LoginPage'
 import { MainLayout } from './layouts/MainLayout'

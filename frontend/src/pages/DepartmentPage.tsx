@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /**
  * 部署管理ページ
  */
@@ -29,10 +30,6 @@ export default function DepartmentPage() {
     const [message, setMessage] = useState('');
     const [isCreateMode, setIsCreateMode] = useState(false);
 
-    useEffect(() => {
-        loadDepartments();
-    }, []);
-
     const loadDepartments = async () => {
 
         try {
@@ -46,6 +43,10 @@ export default function DepartmentPage() {
             );
         }
     };
+
+    useEffect(() => {
+        loadDepartments();
+    }, []);
 
     const filteredDepartments =
         useMemo(() => {

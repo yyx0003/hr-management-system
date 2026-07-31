@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /**
  * 資格管理ページ
  */
@@ -38,10 +39,6 @@ export default function QualificationPage() {
     const [message,setMessage] = useState('');
     const [isCreateMode, setIsCreateMode] = useState(false);
 
-    useEffect(() => {
-        loadQualifications();
-    }, []);
-
     const loadQualifications = async () => {
         try {
             const data = await qualificationApi.findAll();
@@ -55,6 +52,10 @@ export default function QualificationPage() {
             );
         }
     };
+
+    useEffect(() => {
+        loadQualifications();
+    }, []);
 
     const filteredQualifications =
         useMemo(() => {
