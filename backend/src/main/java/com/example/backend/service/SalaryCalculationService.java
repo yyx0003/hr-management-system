@@ -1,5 +1,7 @@
 package com.example.backend.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -80,8 +82,7 @@ public class SalaryCalculationService {
         LocalDate targetMonthStart = targetYearMonth.atDay(1);
         LocalDate targetMonthEnd = targetYearMonth.atEndOfMonth();
 
-
-        // 1. 稼働時間・残業時間の算出
+        // 1. 稼働時間・残業時間・休日出勤時間・不足時間の算出
         WorkHoursResult workHours = workHoursCalculationService.calculateWorkHours(employeeId, targetMonthStart, targetMonthEnd);
 
         // 2. 対象年月時点で有効なemployeeレコードを1件取得（部署・職能資格・役職をまとめて取得）
@@ -97,8 +98,27 @@ public class SalaryCalculationService {
         long qualificationAllowance = calculateQualificationAllowance(employeeId, targetMonthEnd);
         long seniorityAllowance = calculateSeniorityAllowance(employee.getHireDate(), targetYearMonth);
 
+        // 3.5. 時給換算し、残業代・休日出勤代・欠勤控除額を算出する
+        BigDecimal hourlyWage = BigDecimal.valueOf(gradeAllowance + seniorityAllowance)
+                .divide(SalaryConstants.STANDARD_MONTHLY_HOURS, 0, RoundingMode.UP);
+
+        long overtimePay = hourlyWage.multiply(workHours.getOvertimeHours())
+                .multiply(SalaryConstants.OVERTIME_RATE)
+                .setScale(0, RoundingMode.HALF_UP)
+                .longValue();
+
+        long holidayWorkPay = hourlyWage.multiply(workHours.getHolidayWorkHours())
+                .multiply(SalaryConstants.HOLIDAY_WORK_RATE)
+                .setScale(0, RoundingMode.HALF_UP)
+                .longValue();
+
+        long absenceDeduction = hourlyWage.multiply(workHours.getShortfallHours())
+                .setScale(0, RoundingMode.HALF_UP)
+                .longValue();
+
         // 4. 給与総額の算出
-        long totalSalary = gradeAllowance + positionAllowance + qualificationAllowance + seniorityAllowance;
+        long totalSalary = gradeAllowance + positionAllowance + qualificationAllowance + seniorityAllowance
+                + overtimePay + holidayWorkPay - absenceDeduction;
 
         // 5. 登録
         SalaryResult result = new SalaryResult();
@@ -108,6 +128,7 @@ public class SalaryCalculationService {
         result.setDepartmentId(employee.getDepartmentId());
         result.setTotalWorkHours(workHours.getWorkHours());
         result.setTotalOvertimeHours(workHours.getOvertimeHours());
+        result.setTotalHolidayWorkHours(workHours.getHolidayWorkHours());
         result.setTotalSalary(totalSalary);
         salaryResultRepository.insert(result);
     }
@@ -187,5 +208,33 @@ public class SalaryCalculationService {
     /** 4月始まりの年度を返す（1〜3月は前年扱い）。 */
     private int fiscalYearOf(YearMonth yearMonth) {
         return yearMonth.getMonthValue() >= 4 ? yearMonth.getYear() : yearMonth.getYear() - 1;
+    }
+
+    /**
+     * 対象社員・対象年月の給与実績を再計算する。
+     * 既存のsalary_resultを削除してから再計算するため、
+     * 勤怠変更・CSV取込など、既に算出済みの給与実績を最新化したい場合に使用する。
+     */
+    @Transactional
+    public void recalculateForEmployee(Long employeeId, YearMonth targetYearMonth) {
+        salaryResultRepository.deleteByEmployeeIdAndTargetMonth(
+                employeeId, targetYearMonth.getYear(), targetYearMonth.getMonthValue());
+        calculateOne(employeeId, targetYearMonth);
+    }
+
+    /**
+     * 呼び出し元の勤怠トランザクションに影響を与えずに給与を再計算する。
+     * 計算に失敗した場合、既存のsalary_resultは削除された状態のまま残し、
+     * 例外は投げずにログ出力のみ行う（勤怠保存自体は成功させるため）。
+     */
+    public void recalculateForEmployeeSafely(
+            SalaryResultTransactionHelper helper, Long employeeId, YearMonth targetYearMonth) {
+        helper.deleteSalaryResultOnly(employeeId, targetYearMonth);
+        try {
+            helper.calculateOneInNewTransaction(employeeId, targetYearMonth);
+        } catch (SalaryCalculationException e) {
+            log.error("給与再計算に失敗しました。employeeId={}, targetYearMonth={}, 理由={}",
+                    employeeId, targetYearMonth, e.getMessage());
+        }
     }
 }

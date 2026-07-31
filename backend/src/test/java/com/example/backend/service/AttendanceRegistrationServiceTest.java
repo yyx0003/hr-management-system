@@ -40,6 +40,12 @@ class AttendanceRegistrationServiceTest {
     @Mock
     private MessageService messageService;
 
+    @Mock
+    private SalaryCalculationService salaryCalculationService;
+
+    @Mock
+    private SalaryResultTransactionHelper salaryResultTransactionHelper;
+
     private AttendanceRegistrationService service;
 
     @BeforeEach
@@ -49,7 +55,9 @@ class AttendanceRegistrationServiceTest {
                         attendanceRepository,
                         inputValidationService,
                         deadlineService,
-                        messageService);
+                        messageService,
+                        salaryCalculationService,
+                        salaryResultTransactionHelper);
     }
 
     @Test

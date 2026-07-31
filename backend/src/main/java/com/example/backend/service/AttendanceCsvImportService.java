@@ -36,6 +36,10 @@ public class AttendanceCsvImportService {
             attendanceRepository;
 
     private final MessageService messageService;
+private final SalaryCalculationService
+    salaryCalculationService;
+private final SalaryResultTransactionHelper
+    salaryResultTransactionHelper;
 
     /**
      * 勤怠CSVを取り込む。
@@ -47,7 +51,7 @@ public class AttendanceCsvImportService {
      * 対象社員・対象年月の既存勤怠を削除し、
      * CSVの内容で置き換える。
      *
-     * 給与計算およびsalary_resultの更新は行わない。
+     * 取込後、対象社員・対象年月のsalary_resultを再計算する。
      *
      * @param employeeId 社員ID
      * @param employeeNo 社員番号
@@ -111,14 +115,22 @@ public class AttendanceCsvImportService {
         /*
          * CSVの勤怠データを登録する。
          */
-        int registeredCount =
-                registerAttendances(
-                        employeeId,
-                        validationResult.getRows());
+        int registeredCount = registerAttendances(employeeId, validationResult.getRows());
 
-        return createSuccessResponse(
-                parseResult.getRows().size(),
-                registeredCount);
+if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                    new org.springframework.transaction.support.TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            salaryCalculationService.recalculateForEmployeeSafely(
+                                    salaryResultTransactionHelper, employeeId, targetMonth);
+                        }
+                    });
+        } else {
+            salaryCalculationService.recalculateForEmployeeSafely(
+                    salaryResultTransactionHelper, employeeId, targetMonth);
+        }
+return createSuccessResponse(parseResult.getRows().size(), registeredCount);
     }
 
     /**

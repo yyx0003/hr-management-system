@@ -104,7 +104,7 @@ public class AttendanceListItemMapper {
                         workType);
 
         if (Attendance.WorkType.HOLIDAY_WORK.equals(workType)) {
-            return workHoursResult.getOvertimeHours();
+            return workHoursResult.getHolidayWorkHours();
         }
 
         return workHoursResult.getWorkHours()

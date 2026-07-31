@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 
 import org.springframework.stereotype.Service;
@@ -23,15 +24,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AttendanceRegistrationService {
 
-    private final AttendanceRepository attendanceRepository;
-    private final AttendanceInputValidationService inputValidationService;
-    private final AttendanceDeadlineService deadlineService;
-    private final MessageService messageService;
+        private final AttendanceRepository attendanceRepository;
+        private final AttendanceInputValidationService inputValidationService;
+        private final AttendanceDeadlineService deadlineService;
+        private final MessageService messageService;
+        private final SalaryCalculationService salaryCalculationService;
+        private final SalaryResultTransactionHelper salaryResultTransactionHelper;
 
     /**
      * 勤怠情報を新規登録する。
      *
-     * 給与計算およびsalary_resultの更新は行わない。
+     *  登録後、対象社員・対象年月のsalary_resultを再計算する。
      *
      * @param employeeId 社員ID
      * @param request 登録内容
@@ -78,138 +81,148 @@ public class AttendanceRegistrationService {
 
         attendanceRepository.insert(attendance);
 
-        return attendance;
-    }
-
-    /**
-     * 登録引数を確認する。
-     *
-     * @param employeeId 社員ID
-     * @param request 登録内容
-     */
-    private void validateArguments(
-            Long employeeId,
-            AttendanceCreateRequest request) {
-
-        if (employeeId == null) {
-            throw new IllegalArgumentException(
-                    "employeeId must not be null");
+if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                    new org.springframework.transaction.support.TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            salaryCalculationService.recalculateForEmployeeSafely(
+                                    salaryResultTransactionHelper, employeeId, YearMonth.from(workDate));
+                        }
+                    });
+        } else {
+            salaryCalculationService.recalculateForEmployeeSafely(
+                    salaryResultTransactionHelper, employeeId, YearMonth.from(workDate));
         }
-
-        if (request == null) {
-            throw new IllegalArgumentException(
-                    "request must not be null");
-        }
-    }
-
-    /**
-     * 勤務日をLocalDateへ変換する。
-     *
-     * @param workDate 勤務日文字列
-     * @return 勤務日
-     */
-    private LocalDate parseWorkDate(String workDate) {
-
-        if (workDate == null || workDate.isBlank()) {
-            throw new BusinessException(
-                    messageService.getMessage(
-                            "error.attendance.workDate.required"));
-        }
-
-        try {
-            return LocalDate.parse(workDate);
-        } catch (DateTimeParseException exception) {
-            throw new BusinessException(
-                    messageService.getMessage(
-                            "error.attendance.workDate.invalid"));
-        }
-    }
-
-    /**
-     * 時刻文字列をLocalTimeへ変換する。
-     *
-     * 空文字の場合はnullを返す。
-     *
-     * @param time 時刻文字列
-     * @param fieldName 項目名
-     * @return 時刻
-     */
-    private LocalTime parseTime(
-            String time,
-            String fieldName) {
-
-        if (time == null || time.isBlank()) {
-            return null;
-        }
-
-        try {
-            return LocalTime.parse(time);
-        } catch (DateTimeParseException exception) {
-            throw new BusinessException(
-                    messageService.getMessage(
-                            "error.attendance.time.invalidFormat",
-                            fieldName));
-        }
-    }
-
-    /**
-     * 同一社員・同一勤務日の勤怠が未登録であることを確認する。
-     *
-     * @param employeeId 社員ID
-     * @param workDate 勤務日
-     */
-    private void validateNotRegistered(
-            Long employeeId,
-            LocalDate workDate) {
-
-        LambdaQueryWrapper<Attendance> query =
-                new LambdaQueryWrapper<>();
-
-        query.eq(
-                Attendance::getEmployeeId,
-                employeeId);
-
-        query.eq(
-                Attendance::getWorkDate,
-                workDate);
-
-        Long count =
-                attendanceRepository.selectCount(query);
-
-        if (count != null && count > 0) {
-            throw new BusinessException(
-                    messageService.getMessage(
-                            "error.attendance.duplicate",
-                            workDate));
-        }
-    }
-
-    /**
-     * 登録用の勤怠Entityを生成する。
-     *
-     * @param employeeId 社員ID
-     * @param workDate 勤務日
-     * @param attendanceTime 出勤時刻
-     * @param leavingTime 退勤時刻
-     * @param workType 勤務区分
-     * @return 勤怠Entity
-     */
-    private Attendance createAttendance(
-            Long employeeId,
-            LocalDate workDate,
-            LocalTime attendanceTime,
-            LocalTime leavingTime,
-            String workType) {
-
-        Attendance attendance =
-                new Attendance();
-
-        attendance.setEmployeeId(employeeId);
-        attendance.setWorkDate(workDate);
-        attendance.setAttendanceTime(attendanceTime);
-        attendance.setLeavingTime(leavingTime);
-        attendance.setWorkType(workType);
 
         return attendance;
-    }
+            }
+        /**
+         * 登録引数を確認する。
+         *
+         * @param employeeId 社員ID
+         * @param request    登録内容
+         */
+        private void validateArguments(
+                        Long employeeId,
+                        AttendanceCreateRequest request) {
+
+                if (employeeId == null) {
+                        throw new IllegalArgumentException(
+                                        "employeeId must not be null");
+                }
+
+                if (request == null) {
+                        throw new IllegalArgumentException(
+                                        "request must not be null");
+                }
+        }
+
+        /**
+         * 勤務日をLocalDateへ変換する。
+         *
+         * @param workDate 勤務日文字列
+         * @return 勤務日
+         */
+        private LocalDate parseWorkDate(String workDate) {
+
+                if (workDate == null || workDate.isBlank()) {
+                        throw new BusinessException(
+                                        messageService.getMessage(
+                                                        "error.attendance.workDate.required"));
+                }
+
+                try {
+                        return LocalDate.parse(workDate);
+                } catch (DateTimeParseException exception) {
+                        throw new BusinessException(
+                                        messageService.getMessage(
+                                                        "error.attendance.workDate.invalid"));
+                }
+        }
+
+        /**
+         * 時刻文字列をLocalTimeへ変換する。
+         *
+         * 空文字の場合はnullを返す。
+         *
+         * @param time      時刻文字列
+         * @param fieldName 項目名
+         * @return 時刻
+         */
+        private LocalTime parseTime(
+                        String time,
+                        String fieldName) {
+
+                if (time == null || time.isBlank()) {
+                        return null;
+                }
+
+                try {
+                        return LocalTime.parse(time);
+                } catch (DateTimeParseException exception) {
+                        throw new BusinessException(
+                                        messageService.getMessage(
+                                                        "error.attendance.time.invalidFormat",
+                                                        fieldName));
+                }
+        }
+
+        /**
+         * 同一社員・同一勤務日の勤怠が未登録であることを確認する。
+         *
+         * @param employeeId 社員ID
+         * @param workDate   勤務日
+         */
+        private void validateNotRegistered(
+                        Long employeeId,
+                        LocalDate workDate) {
+
+                LambdaQueryWrapper<Attendance> query = new LambdaQueryWrapper<>();
+
+                query.eq(
+                                Attendance::getEmployeeId,
+                                employeeId);
+
+                query.eq(
+                                Attendance::getWorkDate,
+                                workDate);
+
+                Long count = attendanceRepository.selectCount(query);
+
+                if (count != null && count > 0) {
+                        throw new BusinessException(
+                                        messageService.getMessage(
+                                                        "error.attendance.duplicate",
+                                                        workDate));
+                }
+        }
+
+        /**
+         * 登録用の勤怠Entityを生成する。
+         *
+         * @param employeeId     社員ID
+         * @param workDate       勤務日
+         * @param attendanceTime 出勤時刻
+         * @param leavingTime    退勤時刻
+         * @param workType       勤務区分
+         * @return 勤怠Entity
+         */
+        private Attendance createAttendance(
+                        Long employeeId,
+                        LocalDate workDate,
+                        LocalTime attendanceTime,
+                        LocalTime leavingTime,
+                        String workType) {
+
+                Attendance attendance = new Attendance();
+
+                attendance.setEmployeeId(employeeId);
+                attendance.setWorkDate(workDate);
+                attendance.setAttendanceTime(attendanceTime);
+                attendance.setLeavingTime(leavingTime);
+                attendance.setWorkType(workType);
+
+                return attendance;
+        }
 }

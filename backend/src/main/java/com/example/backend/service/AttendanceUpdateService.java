@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 
 import org.springframework.http.HttpStatus;
@@ -28,11 +29,12 @@ public class AttendanceUpdateService {
     private final AttendanceInputValidationService inputValidationService;
     private final AttendanceDeadlineService deadlineService;
     private final MessageService messageService;
-
+private final SalaryCalculationService salaryCalculationService;
+private final SalaryResultTransactionHelper salaryResultTransactionHelper;
     /**
      * 対象社員・対象勤務日の勤怠情報を更新する。
      *
-     * 給与計算およびsalary_resultの更新は行わない。
+     * 更新後、対象社員・対象年月のsalary_resultを再計算する。
      *
      * @param employeeId 社員ID
      * @param workDate 勤務日
@@ -81,11 +83,25 @@ public class AttendanceUpdateService {
                         employeeId,
                         workDate);
 
-        attendanceRepository.update(
-                attendance,
-                updateCondition);
+       attendanceRepository.update(
+        attendance,
+        updateCondition);
 
-        return attendance;
+if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                    new org.springframework.transaction.support.TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            salaryCalculationService.recalculateForEmployeeSafely(
+                                    salaryResultTransactionHelper, employeeId, YearMonth.from(workDate));
+                        }
+                    });
+        } else {
+            salaryCalculationService.recalculateForEmployeeSafely(
+                    salaryResultTransactionHelper, employeeId, YearMonth.from(workDate));
+        }
+
+return attendance;
     }
 
     /**

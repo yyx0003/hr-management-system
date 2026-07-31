@@ -22,6 +22,7 @@ public class AttendanceMonthlyDeleteService {
     private final AttendanceRepository attendanceRepository;
     private final AttendanceDeadlineService deadlineService;
     private final MessageService messageService;
+    private final SalaryResultTransactionHelper salaryResultTransactionHelper;
 
     /**
      * 対象社員・対象年月の勤怠情報を全件削除する。
@@ -58,6 +59,9 @@ public class AttendanceMonthlyDeleteService {
                                 employeeId,
                                 targetMonthStart,
                                 targetMonthEnd);
+
+        salaryResultTransactionHelper.deleteSalaryResultOnly(
+                employeeId, targetMonth);
 
         String messageKey =
                 deletedCount > 0

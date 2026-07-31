@@ -97,17 +97,17 @@ class AttendanceServiceTest {
     }
 
     @Test
-    void holidayWorkCanBeCalculated() {
+void holidayWorkCanBeCalculated() {
+    WorkHoursResult result =
+            attendanceService.calculateWorkHours(
+                    LocalTime.of(10, 0),
+                    LocalTime.of(19, 0),
+                    Attendance.WorkType.HOLIDAY_WORK);
 
-        WorkHoursResult result =
-                attendanceService.calculateWorkHours(
-                        LocalTime.of(10, 0),
-                        LocalTime.of(19, 0),
-                        Attendance.WorkType.HOLIDAY_WORK);
-
-        assertHours("0.00", result.getWorkHours());
-        assertHours("9.00", result.getOvertimeHours());
-    }
+    assertHours("0.00", result.getWorkHours());
+    assertHours("0.00", result.getOvertimeHours());
+    assertHours("9.00", result.getHolidayWorkHours());
+}
 
     @Test
     void missingAttendanceTimeThrowsException() {

@@ -35,27 +35,6 @@ public class AttendanceService {
     /** メッセージ取得用 */
     private final MessageService messageService;
 
-    /**
-     * 勤務時間と残業時間を計算する。
-     *
-     * NORMAL：
-     * 実働時間のうち8時間までを勤務時間、
-     * 8時間を超えた分を残業時間とする。
-     *
-     * HOLIDAY_WORK：
-     * 実働時間を全て残業時間とする。
-     *
-     * PAID_LEAVE：
-     * 勤務時間を8時間とする。
-     *
-     * ABSENCE：
-     * 勤務時間と残業時間を0時間とする。
-     *
-     * @param attendanceTime 出勤時刻
-     * @param leavingTime 退勤時刻
-     * @param workType 勤務区分
-     * @return 勤務時間と残業時間
-     */
     public WorkHoursResult calculateWorkHours(
             LocalTime attendanceTime,
             LocalTime leavingTime,
@@ -66,6 +45,8 @@ public class AttendanceService {
         if (Attendance.WorkType.PAID_LEAVE.equals(workType)) {
             return new WorkHoursResult(
                     STANDARD_WORK_HOURS,
+                    ZERO_HOURS,
+                    ZERO_HOURS,
                     ZERO_HOURS);
         }
 
@@ -81,7 +62,9 @@ public class AttendanceService {
         if (Attendance.WorkType.HOLIDAY_WORK.equals(workType)) {
             return new WorkHoursResult(
                     ZERO_HOURS,
-                    actualHours);
+                    ZERO_HOURS,
+                    actualHours,
+                    ZERO_HOURS);
         }
 
         BigDecimal overtimeHours =
@@ -93,18 +76,18 @@ public class AttendanceService {
                 actualHours.subtract(overtimeHours)
                         .setScale(SCALE, ROUNDING);
 
+        BigDecimal shortfallHours =
+                STANDARD_WORK_HOURS.subtract(actualHours)
+                        .max(ZERO_HOURS)
+                        .setScale(SCALE, ROUNDING);
+
         return new WorkHoursResult(
                 regularWorkHours,
-                overtimeHours);
+                overtimeHours,
+                ZERO_HOURS,
+                shortfallHours);
     }
 
-    /**
-     * 出勤時刻から退勤時刻までの実働時間を計算する。
-     *
-     * @param attendanceTime 出勤時刻
-     * @param leavingTime 退勤時刻
-     * @return 実働時間
-     */
     private BigDecimal calculateActualHours(
             LocalTime attendanceTime,
             LocalTime leavingTime) {
@@ -120,11 +103,6 @@ public class AttendanceService {
                         ROUNDING);
     }
 
-    /**
-     * 勤務区分を確認する。
-     *
-     * @param workType 勤務区分
-     */
     private void validateWorkType(String workType) {
 
         if (workType == null || workType.isBlank()) {
@@ -146,12 +124,6 @@ public class AttendanceService {
         }
     }
 
-    /**
-     * 出退勤時刻を確認する。
-     *
-     * @param attendanceTime 出勤時刻
-     * @param leavingTime 退勤時刻
-     */
     private void validateWorkTimes(
             LocalTime attendanceTime,
             LocalTime leavingTime) {

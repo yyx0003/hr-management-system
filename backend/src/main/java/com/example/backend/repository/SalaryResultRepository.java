@@ -1,13 +1,14 @@
 package com.example.backend.repository;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.example.backend.entity.SalaryResult;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-import java.util.List;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.backend.entity.SalaryResult;
 
 @Mapper
 public interface SalaryResultRepository extends BaseMapper<SalaryResult> {
@@ -27,4 +28,15 @@ public interface SalaryResultRepository extends BaseMapper<SalaryResult> {
     List<SalaryResult> findByTargetYearAndTargetMonthOrderByEmployeeId(
             @Param("targetYear") Integer targetYear,
             @Param("targetMonth") Integer targetMonth);
+
+    /** 対象社員・対象年月の給与実績を削除する。勤怠変更等による再計算の前処理として使用する。 */
+    @Delete("""
+            DELETE FROM salary_result
+            WHERE employee_id = #{employeeId}
+            AND target_year = #{targetYear}
+            AND target_month = #{targetMonth}
+            """)
+    int deleteByEmployeeIdAndTargetMonth(@Param("employeeId") Long employeeId,
+                                          @Param("targetYear") Integer targetYear,
+                                          @Param("targetMonth") Integer targetMonth);
 }

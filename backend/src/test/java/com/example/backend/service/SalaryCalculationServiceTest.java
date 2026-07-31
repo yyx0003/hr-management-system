@@ -15,6 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -256,6 +257,132 @@ class SalaryCalculationServiceTest {
 
         // 正常な2名分はinsertが呼ばれ、スキップされた1名分は呼ばれない
         verify(salaryResultRepository, times(2)).insert(any(SalaryResult.class));
+    }
+
+    // ------------------------------------------------------------------
+    // calculateOne：時給ベースの給与計算
+    // ------------------------------------------------------------------
+
+    @Test
+    void calculateOne_時給は職能資格給と所属年給の合計を160Hで割って切上げる() {
+        // gradeAllowance=155,000円 + seniorityAllowance=5,000円 = 160,000円 → 時給=1,000円（割り切れるケース）
+        setUpBasicEmployee(155_000L);
+        when(workHoursCalculationService.calculateWorkHours(1L, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31)))
+                .thenReturn(new com.example.backend.dto.attendance.WorkHoursResult(
+                        java.math.BigDecimal.valueOf(160), java.math.BigDecimal.ZERO,
+                        java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO));
+
+        target.calculateOne(1L, YearMonth.of(2026, 7));
+
+        ArgumentCaptor<SalaryResult> captor = ArgumentCaptor.forClass(SalaryResult.class);
+        verify(salaryResultRepository).insert(captor.capture());
+        // 残業・休日出勤・不足いずれも0時間のため、総額は固定手当合計のみ = 155,000 + 5,000 = 160,000
+        assertThat(captor.getValue().getTotalSalary()).isEqualTo(160_000L);
+    }
+
+    @Test
+    void calculateOne_時給計算で小数点以下は切上げになる() {
+        // gradeAllowance=95,001円 + seniorityAllowance=5,000円 = 100,001円
+        setUpBasicEmployee(95_001L);
+        when(workHoursCalculationService.calculateWorkHours(1L, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31)))
+                .thenReturn(new com.example.backend.dto.attendance.WorkHoursResult(
+                        java.math.BigDecimal.valueOf(160), java.math.BigDecimal.ONE,
+                        java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO));
+
+        target.calculateOne(1L, YearMonth.of(2026, 7));
+
+        ArgumentCaptor<SalaryResult> captor = ArgumentCaptor.forClass(SalaryResult.class);
+        verify(salaryResultRepository).insert(captor.capture());
+        // 100,001÷160=625.00625... → 切上げで626円。残業1時間×1.25倍=782.5円→四捨五入で783円
+        // 総額 = 100,001（固定手当） + 783（残業代） = 100,784
+        assertThat(captor.getValue().getTotalSalary()).isEqualTo(100_784L);
+    }
+
+    @Test
+    void calculateOne_残業代は時給の1_25倍で計算される() {
+        setUpBasicEmployee(155_000L); // + seniority 5,000円 = 160,000円 → 時給1,000円
+        when(workHoursCalculationService.calculateWorkHours(1L, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31)))
+                .thenReturn(new com.example.backend.dto.attendance.WorkHoursResult(
+                        java.math.BigDecimal.valueOf(160), java.math.BigDecimal.valueOf(10),
+                        java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO));
+
+        target.calculateOne(1L, YearMonth.of(2026, 7));
+
+        ArgumentCaptor<SalaryResult> captor = ArgumentCaptor.forClass(SalaryResult.class);
+        verify(salaryResultRepository).insert(captor.capture());
+        // 残業代 = 1,000円 × 10時間 × 1.25 = 12,500円 → 総額 = 160,000 + 12,500 = 172,500
+        assertThat(captor.getValue().getTotalSalary()).isEqualTo(172_500L);
+    }
+
+    @Test
+    void calculateOne_休日出勤代は時給の1_5倍で計算される() {
+        setUpBasicEmployee(155_000L); // 時給1,000円
+        when(workHoursCalculationService.calculateWorkHours(1L, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31)))
+                .thenReturn(new com.example.backend.dto.attendance.WorkHoursResult(
+                        java.math.BigDecimal.valueOf(160), java.math.BigDecimal.ZERO,
+                        java.math.BigDecimal.valueOf(8), java.math.BigDecimal.ZERO));
+
+        target.calculateOne(1L, YearMonth.of(2026, 7));
+
+        ArgumentCaptor<SalaryResult> captor = ArgumentCaptor.forClass(SalaryResult.class);
+        verify(salaryResultRepository).insert(captor.capture());
+        // 休日出勤代 = 1,000円 × 8時間 × 1.5 = 12,000円 → 総額 = 160,000 + 12,000 = 172,000
+        assertThat(captor.getValue().getTotalSalary()).isEqualTo(172_000L);
+        assertThat(captor.getValue().getTotalHolidayWorkHours())
+                .isEqualByComparingTo(java.math.BigDecimal.valueOf(8));
+    }
+
+    @Test
+    void calculateOne_欠勤等の不足時間は時給換算で給与から控除される() {
+        setUpBasicEmployee(155_000L); // 時給1,000円
+        when(workHoursCalculationService.calculateWorkHours(1L, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31)))
+                .thenReturn(new com.example.backend.dto.attendance.WorkHoursResult(
+                        java.math.BigDecimal.valueOf(152), java.math.BigDecimal.ZERO,
+                        java.math.BigDecimal.ZERO, java.math.BigDecimal.valueOf(8)));
+
+        target.calculateOne(1L, YearMonth.of(2026, 7));
+
+        ArgumentCaptor<SalaryResult> captor = ArgumentCaptor.forClass(SalaryResult.class);
+        verify(salaryResultRepository).insert(captor.capture());
+        // 欠勤控除額 = 1,000円 × 8時間 = 8,000円 → 総額 = 160,000 − 8,000 = 152,000
+        assertThat(captor.getValue().getTotalSalary()).isEqualTo(152_000L);
+    }
+
+    @Test
+    void calculateOne_残業_休日出勤_欠勤控除が同時に発生した場合まとめて計算される() {
+        setUpBasicEmployee(155_000L); // 時給1,000円
+        when(workHoursCalculationService.calculateWorkHours(1L, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31)))
+                .thenReturn(new com.example.backend.dto.attendance.WorkHoursResult(
+                        java.math.BigDecimal.valueOf(150), java.math.BigDecimal.valueOf(5),
+                        java.math.BigDecimal.valueOf(3), java.math.BigDecimal.valueOf(2)));
+
+        target.calculateOne(1L, YearMonth.of(2026, 7));
+
+        ArgumentCaptor<SalaryResult> captor = ArgumentCaptor.forClass(SalaryResult.class);
+        verify(salaryResultRepository).insert(captor.capture());
+        // 残業代=1,000×5×1.25=6,250円、休日出勤代=1,000×3×1.5=4,500円、欠勤控除=1,000×2=2,000円
+        // 総額 = 160,000 + 6,250 + 4,500 − 2,000 = 168,750
+        assertThat(captor.getValue().getTotalSalary()).isEqualTo(168_750L);
+    }
+
+    /**
+     * 時給計算テスト用に、gradeAllowance以外を全て0円に固定したemployee/skillGrade/qualificationのモックを準備する。
+     * hireDateは十分過去にし、seniorityAllowanceが常に基本額5,000円のみになるようにする
+     * （4月改定を一度も跨がない期間に設定）。
+     */
+    private void setUpBasicEmployee(long gradeAllowance) {
+        Employee employee = employee(1L, 1L, 3, null);
+        employee.setHireDate(LocalDate.of(2026, 5, 1)); // 2026/7時点でまだ4月改定を跨いでいない → seniorityAllowance=5,000円固定
+
+        when(employeeService.findEffectiveEmployeeAt(1L, LocalDate.of(2026, 7, 31))).thenReturn(employee);
+
+        SkillGrade grade = new SkillGrade();
+        grade.setSkillGrade(3);
+        grade.setAllowance(gradeAllowance);
+        when(skillGradeRepository.findEffectiveAt(3, LocalDate.of(2026, 7, 31))).thenReturn(grade);
+
+        when(employeeQualificationRepository.findByEmployeeIdOrderByAcquisitionDate(1L))
+                .thenReturn(List.of());
     }
 
     // ------------------------------------------------------------------

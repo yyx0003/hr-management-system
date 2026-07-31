@@ -20,4 +20,13 @@ public final class SalaryConstants {
 
     // 考勤修改截止日：次月5号
     public static final int ATTENDANCE_EDIT_DEADLINE_DAY = 5;
+
+    // 時給換算の基準月間時間：160時間
+    public static final BigDecimal STANDARD_MONTHLY_HOURS = BigDecimal.valueOf(160);
+
+    // 残業時間の割増率：1.25倍
+    public static final BigDecimal OVERTIME_RATE = new BigDecimal("1.25");
+
+    // 休日出勤時間の割増率：1.5倍
+    public static final BigDecimal HOLIDAY_WORK_RATE = new BigDecimal("1.5");
 }
